@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · StockDesk{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Dashboard</h1>
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Today's Sales</h6>
+                <p class="h3 mb-0">&mdash;</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">This Month's Sales</h6>
+                <p class="h3 mb-0">&mdash;</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Low Stock Items</h6>
+                <p class="h3 mb-0">&mdash;</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Pending Payments</h6>
+                <p class="h3 mb-0">&mdash;</p>
+            </div>
+        </div>
+    </div>
+</div>
+<p class="text-muted mt-4">Dashboard metrics will be wired up once the Sales and Inventory modules are built.</p>
+{% endblock %}
