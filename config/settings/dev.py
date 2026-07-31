@@ -14,3 +14,11 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Relaxed in dev only — production overrides these explicitly in prod.py.
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+
+# Console-only logging in dev: TimedRotatingFileHandler's midnight rollover
+# does an os.rename() that Windows refuses while a prior process still holds
+# the file handle. Production (Linux, single gunicorn-managed process) keeps
+# the file handler defined in base.py.
+LOGGING["root"]["handlers"] = ["console"]
+for _logger in LOGGING["loggers"].values():
+    _logger["handlers"] = ["console"]
