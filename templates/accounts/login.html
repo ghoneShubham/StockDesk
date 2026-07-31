@@ -1,30 +1,39 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
 {% block title %}Login · StockDesk{% endblock %}
+{% block body_class %}sd-login{% endblock %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h4 class="card-title mb-3 text-center">StockDesk Login</h4>
-                {% if form.errors %}
-                    <div class="alert alert-danger">Invalid username or password.</div>
-                {% endif %}
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        {{ form.username|add_class:"form-control" }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        {{ form.password|add_class:"form-control" }}
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Log in</button>
-                    <input type="hidden" name="next" value="{{ next }}">
-                </form>
-            </div>
+<div class="sd-login-shell">
+    <section class="sd-login-hero" aria-label="StockDesk brand">
+        <p class="mb-2 fw-semibold text-uppercase" style="letter-spacing: 0.12em; font-size: 0.8rem; opacity: 0.85;">Inventory &amp; Billing</p>
+        <h1 class="sd-login-brand">StockDesk</h1>
+        <p class="sd-login-tagline">Track stock, bill faster, and keep every number explainable — from one colorful desk.</p>
+    </section>
+
+    <section class="sd-login-form-wrap">
+        <div class="sd-login-form">
+            <div class="sd-login-accent-bar" aria-hidden="true"></div>
+            <h1>Welcome back</h1>
+            <p class="sd-form-hint">Sign in to run today's sales and stock.</p>
+
+            {% if form.errors %}
+                <div class="alert alert-danger sd-alert py-2">Invalid username or password.</div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_username">Username</label>
+                    {{ form.username|add_class:"form-control"|attr:"placeholder:Enter username"|attr:"autocomplete:username" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="id_password">Password</label>
+                    {{ form.password|add_class:"form-control"|attr:"placeholder:Enter password"|attr:"autocomplete:current-password" }}
+                </div>
+                <button type="submit" class="sd-btn-primary">Log in</button>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

@@ -1,40 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · StockDesk{% endblock %}
 {% block content %}
-<h1 class="h3 mb-4">Dashboard</h1>
+<header class="mb-1">
+    <h1 class="sd-page-title">Good day, {{ user.get_username }}</h1>
+    <p class="sd-page-sub">Your live pulse for sales, stock, and collections — metrics fill in once Sales &amp; Inventory are live.</p>
+</header>
+
 <div class="row g-3">
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Today's Sales</h6>
-                <p class="h3 mb-0">&mdash;</p>
-            </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="sd-metric sd-metric--teal">
+            <div class="sd-metric__icon"><i class="bi bi-receipt"></i></div>
+            <div class="sd-metric__label">Today's Sales</div>
+            <div class="sd-metric__value">&mdash;</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">This Month's Sales</h6>
-                <p class="h3 mb-0">&mdash;</p>
-            </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="sd-metric sd-metric--coral">
+            <div class="sd-metric__icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="sd-metric__label">This Month</div>
+            <div class="sd-metric__value">&mdash;</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Low Stock Items</h6>
-                <p class="h3 mb-0">&mdash;</p>
-            </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="sd-metric sd-metric--amber">
+            <div class="sd-metric__icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="sd-metric__label">Low Stock</div>
+            <div class="sd-metric__value">&mdash;</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Pending Payments</h6>
-                <p class="h3 mb-0">&mdash;</p>
-            </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="sd-metric sd-metric--ink">
+            <div class="sd-metric__icon"><i class="bi bi-wallet2"></i></div>
+            <div class="sd-metric__label">Pending Payments</div>
+            <div class="sd-metric__value">&mdash;</div>
         </div>
     </div>
 </div>
-<p class="text-muted mt-4">Dashboard metrics will be wired up once the Sales and Inventory modules are built.</p>
+
+<section class="sd-panel">
+    <h2>What's next on StockDesk</h2>
+    <p class="text-muted mb-0">Masters, purchases, and billing screens will plug into this dashboard. Until then, explore the colorful shell and admin for data entry.</p>
+    <div class="sd-chip-row">
+        <span class="sd-chip"><i class="bi bi-boxes"></i> Stock ledger ready</span>
+        <span class="sd-chip sd-chip--coral"><i class="bi bi-cart-check"></i> Billing coming soon</span>
+        <span class="sd-chip sd-chip--amber"><i class="bi bi-bar-chart"></i> Reports later</span>
+    </div>
+</section>
 {% endblock %}
