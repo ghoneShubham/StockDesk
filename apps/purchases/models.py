@@ -22,7 +22,7 @@ class Purchase(models.Model):
             models.Index(fields=["-purchase_date"]),
         ]
         constraints = [
-            models.CheckConstraint(check=models.Q(total_amount__gte=Decimal("0")), name="purchase_total_gte_0"),
+            models.CheckConstraint(condition=models.Q(total_amount__gte=Decimal("0")), name="purchase_total_gte_0"),
         ]
 
     def __str__(self):
@@ -38,8 +38,8 @@ class PurchaseItem(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(qty__gt=Decimal("0")), name="purchase_item_qty_gt_0"),
-            models.CheckConstraint(check=models.Q(rate__gte=Decimal("0")), name="purchase_item_rate_gte_0"),
+            models.CheckConstraint(condition=models.Q(qty__gt=Decimal("0")), name="purchase_item_qty_gt_0"),
+            models.CheckConstraint(condition=models.Q(rate__gte=Decimal("0")), name="purchase_item_rate_gte_0"),
         ]
 
     def __str__(self):

@@ -50,10 +50,10 @@ class Sale(models.Model):
             models.Index(fields=["payment_status"]),
         ]
         constraints = [
-            models.CheckConstraint(check=models.Q(subtotal__gte=Decimal("0")), name="sale_subtotal_gte_0"),
-            models.CheckConstraint(check=models.Q(discount__gte=Decimal("0")), name="sale_discount_gte_0"),
-            models.CheckConstraint(check=models.Q(tax__gte=Decimal("0")), name="sale_tax_gte_0"),
-            models.CheckConstraint(check=models.Q(total_amount__gte=Decimal("0")), name="sale_total_gte_0"),
+            models.CheckConstraint(condition=models.Q(subtotal__gte=Decimal("0")), name="sale_subtotal_gte_0"),
+            models.CheckConstraint(condition=models.Q(discount__gte=Decimal("0")), name="sale_discount_gte_0"),
+            models.CheckConstraint(condition=models.Q(tax__gte=Decimal("0")), name="sale_tax_gte_0"),
+            models.CheckConstraint(condition=models.Q(total_amount__gte=Decimal("0")), name="sale_total_gte_0"),
         ]
 
     def __str__(self):
@@ -70,12 +70,12 @@ class SaleItem(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(qty__gt=Decimal("0")), name="sale_item_qty_gt_0"),
-            models.CheckConstraint(check=models.Q(rate__gte=Decimal("0")), name="sale_item_rate_gte_0"),
-            models.CheckConstraint(check=models.Q(discount__gte=Decimal("0")), name="sale_item_discount_gte_0"),
+            models.CheckConstraint(condition=models.Q(qty__gt=Decimal("0")), name="sale_item_qty_gt_0"),
+            models.CheckConstraint(condition=models.Q(rate__gte=Decimal("0")), name="sale_item_rate_gte_0"),
+            models.CheckConstraint(condition=models.Q(discount__gte=Decimal("0")), name="sale_item_discount_gte_0"),
             # Discount cannot exceed the line amount (qty * rate) — PRD test #11.
             models.CheckConstraint(
-                check=models.Q(discount__lte=models.F("qty") * models.F("rate")),
+                condition=models.Q(discount__lte=models.F("qty") * models.F("rate")),
                 name="sale_item_discount_lte_line_amount",
             ),
         ]

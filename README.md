@@ -48,6 +48,8 @@ pip install -r requirements/dev.txt
 ```sql
 CREATE USER stockdesk WITH PASSWORD 'stockdesk_dev_pw';
 CREATE DATABASE stockdesk_dev OWNER stockdesk;
+-- Needed so `pytest` can create/drop its own test database:
+ALTER USER stockdesk CREATEDB;
 ```
 
 ### 5. Configure environment variables

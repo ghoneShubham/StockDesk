@@ -47,15 +47,15 @@ class Product(TimeStampedModel):
         ordering = ["name"]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(purchase_price__gte=Decimal("0")),
+                condition=models.Q(purchase_price__gte=Decimal("0")),
                 name="product_purchase_price_gte_0",
             ),
             models.CheckConstraint(
-                check=models.Q(sale_price__gte=Decimal("0")),
+                condition=models.Q(sale_price__gte=Decimal("0")),
                 name="product_sale_price_gte_0",
             ),
             models.CheckConstraint(
-                check=models.Q(reorder_level__gte=0),
+                condition=models.Q(reorder_level__gte=0),
                 name="product_reorder_level_gte_0",
             ),
         ]

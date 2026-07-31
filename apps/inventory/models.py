@@ -39,7 +39,7 @@ class StockMovement(models.Model):
     class Meta:
         ordering = ["-created_at"]
         constraints = [
-            models.CheckConstraint(check=~models.Q(qty_delta=0), name="stock_movement_qty_delta_nonzero"),
+            models.CheckConstraint(condition=~models.Q(qty_delta=0), name="stock_movement_qty_delta_nonzero"),
         ]
         indexes = [
             models.Index(fields=["product", "-created_at"]),
@@ -79,7 +79,7 @@ class Adjustment(models.Model):
     class Meta:
         ordering = ["-created_at"]
         constraints = [
-            models.CheckConstraint(check=~models.Q(qty_delta=0), name="adjustment_qty_delta_nonzero"),
+            models.CheckConstraint(condition=~models.Q(qty_delta=0), name="adjustment_qty_delta_nonzero"),
         ]
 
     def __str__(self):
