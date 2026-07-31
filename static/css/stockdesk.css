@@ -1,6 +1,6 @@
 /* StockDesk UI — teal / coral retail palette */
 :root {
-    --sd-ink: #12323a;
+    --sd-ink: #000000;
     --sd-muted: #5c7380;
     --sd-teal: #0d8a86;
     --sd-teal-deep: #0a5f5c;
@@ -231,10 +231,10 @@ body.sd-body > * {
     color: #fff;
 }
 
-.sd-metric--teal .sd-metric__icon { background: linear-gradient(135deg, var(--sd-teal), var(--sd-teal-deep)); }
-.sd-metric--coral .sd-metric__icon { background: linear-gradient(135deg, #ff7a6b, var(--sd-coral)); }
-.sd-metric--amber .sd-metric__icon { background: linear-gradient(135deg, #ffc23a, var(--sd-amber)); }
-.sd-metric--ink .sd-metric__icon { background: linear-gradient(135deg, #5aa3c7, #2a5f7a); }
+.sd-metric--teal .sd-metric__icon { background: linear-gradient(135deg,#FFDA62); }
+.sd-metric--coral .sd-metric__icon { background: linear-gradient(135deg, #F8B2B2); }
+.sd-metric--amber .sd-metric__icon { background: linear-gradient(135deg, #97DDE9); }
+.sd-metric--ink .sd-metric__icon { background: linear-gradient(135deg,  #C8A96B); }
 
 .sd-panel {
     margin-top: 1.75rem;
@@ -274,7 +274,7 @@ body.sd-body > * {
 }
 
 .sd-chip--coral {
-    background: #ffe8e4;
+    background: F7F4ED;
     color: #b33a2c;
     border-color: rgba(232, 93, 76, 0.25);
 }
