@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} supplier · StockDesk{% endblock %}
+{% block content %}
+<header>
+    <h1 class="sd-page-title">{% if object %}Edit supplier{% else %}Add supplier{% endif %}</h1>
+</header>
+<section class="sd-panel" style="max-width:640px;">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "masters/_form_fields.html" %}
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.7rem 1.4rem;">Save</button>
+            <a href="{% url 'masters:supplier_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

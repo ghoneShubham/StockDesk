@@ -7,6 +7,7 @@ see `.env.example` for the full list of variables.
 from pathlib import Path
 
 from decouple import Csv, config
+from django.contrib.messages import constants as message_constants
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -96,6 +97,14 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "core:dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: "secondary",
+    message_constants.INFO: "info",
+    message_constants.SUCCESS: "success",
+    message_constants.WARNING: "warning",
+    message_constants.ERROR: "danger",
+}
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = config("DJANGO_TIME_ZONE", default="Asia/Kolkata")

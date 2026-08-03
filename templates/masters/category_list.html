@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Categories · StockDesk{% endblock %}
+{% block content %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Categories</h1>
+        <p class="sd-page-sub mb-0">Group products for reporting and browsing.</p>
+    </div>
+    {% if perms.masters.add_category %}
+    <a href="{% url 'masters:category_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
+        <i class="bi bi-plus-lg"></i> Add category
+    </a>
+    {% endif %}
+</header>
+
+<form method="get" class="sd-panel mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Category name">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="sd-btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead><tr><th>Name</th><th>Active</th><th></th></tr></thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>{% if category.is_active %}Yes{% else %}No{% endif %}</td>
+                    <td class="text-end">
+                        {% if perms.masters.change_category %}
+                        <a href="{% url 'masters:category_update' category.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        {% if category.is_active %}
+                        <form method="post" action="{% url 'masters:category_deactivate' category.pk %}" class="d-inline" onsubmit="return confirm('Deactivate this category?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Deactivate</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-muted p-4">No categories yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

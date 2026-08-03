@@ -95,6 +95,9 @@ python manage.py runserver
 Visit http://127.0.0.1:8000/ and log in. Visit `/health/` to confirm the app
 and database are both reachable.
 
+Masters CRUD lives at `/masters/` (products, categories, suppliers, customers).
+Product images are stored under `media/` in local development.
+
 ## Running tests
 
 ```bash

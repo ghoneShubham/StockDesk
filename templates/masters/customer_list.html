@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Customers · StockDesk{% endblock %}
+{% block content %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Customers</h1>
+        <p class="sd-page-sub mb-0">Walk-ins are allowed at billing; saved customers live here.</p>
+    </div>
+    {% if perms.masters.add_customer %}
+    <a href="{% url 'masters:customer_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
+        <i class="bi bi-plus-lg"></i> Add customer
+    </a>
+    {% endif %}
+</header>
+
+<form method="get" class="sd-panel mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Name or phone">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="sd-btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead><tr><th>Name</th><th>Phone</th><th>Address</th><th></th></tr></thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.phone }}</td>
+                    <td>{{ customer.address|default:"—"|truncatechars:40 }}</td>
+                    <td class="text-end">
+                        {% if perms.masters.change_customer %}
+                        <a href="{% url 'masters:customer_update' customer.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        {% endif %}
+                        {% if perms.masters.delete_customer %}
+                        <form method="post" action="{% url 'masters:customer_delete' customer.pk %}" class="d-inline" onsubmit="return confirm('Delete this customer?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-muted p-4">No customers yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

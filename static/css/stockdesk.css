@@ -442,6 +442,44 @@ body.sd-login {
     }
 }
 
+/* ---------- Masters tables / forms ---------- */
+.sd-table {
+    --bs-table-bg: transparent;
+    margin-bottom: 0;
+}
+
+.sd-table thead th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sd-muted);
+    border-bottom-width: 1px;
+    background: rgba(13, 138, 134, 0.06);
+    padding: 0.85rem 1rem;
+}
+
+.sd-table tbody td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-color: var(--sd-border);
+}
+
+.sd-table tbody tr:hover {
+    background: rgba(13, 138, 134, 0.04);
+}
+
+.sd-panel .form-control,
+.sd-panel .form-select {
+    border: 2px solid rgba(13, 138, 134, 0.16);
+    border-radius: var(--sd-radius-sm);
+}
+
+.sd-panel .form-control:focus,
+.sd-panel .form-select:focus {
+    border-color: var(--sd-teal);
+    box-shadow: 0 0 0 0.2rem rgba(13, 138, 134, 0.15);
+}
+
 @media (max-width: 900px) {
     .sd-login-shell {
         grid-template-columns: 1fr;
