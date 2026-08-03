@@ -9,6 +9,14 @@ MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
 
 INTERNAL_IPS = ["127.0.0.1"]
 
+# Do not pause on 302 redirects (login, form saves). The Redirects panel
+# otherwise shows an interstitial "302 Found — click to continue" page.
+DEBUG_TOOLBAR_CONFIG = {
+    "DISABLE_PANELS": {
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+    },
+}
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Relaxed in dev only — production overrides these explicitly in prod.py.
