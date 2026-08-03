@@ -64,8 +64,17 @@ cp .env.example .env
 ```bash
 python manage.py migrate
 python manage.py bootstrap_roles      # creates Owner / Store Manager / Cashier groups
-python manage.py createsuperuser
+python manage.py create_role_users    # demo logins: owner / manager / cashier
+# or: python manage.py createsuperuser
 ```
+
+Demo users created by `create_role_users` (local/dev only — rotate before production):
+
+| Username | Password | Role |
+|---|---|---|
+| `owner` | `OwnerPass123!` | Owner (staff + superuser) |
+| `manager` | `ManagerPass123!` | Store Manager |
+| `cashier` | `CashierPass123!` | Cashier |
 
 ### 7. (Optional) Seed realistic demo data
 

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Reports · StockDesk{% endblock %}
+{% block content %}
+<header>
+    <h1 class="sd-page-title">Operational reports</h1>
+    <p class="sd-page-sub">Stock and low-stock reports will land here on Days 11–12. Access is already gated to Owner and Store Manager.</p>
+</header>
+<section class="sd-panel">
+    <h2>Coming soon</h2>
+    <p class="text-muted mb-0">This page exists so Day 3 can prove server-side permission enforcement.</p>
+    {% if perms.reports.view_financial_reports %}
+    <p class="mt-3 mb-0">
+        <a href="{% url 'reports:financial' %}">Open financial reports →</a>
+    </p>
+    {% endif %}
+</section>
+{% endblock %}

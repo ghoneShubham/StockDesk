@@ -20,3 +20,5 @@ project (Section 14 deliverable).
 | Command | Why |
 |---|---|
 | `ALTER USER stockdesk CREATEDB;` | pytest-django needs to create/drop its own `test_stockdesk_dev` database on each run; the app's least-privilege role didn't have that by default |
+| `python manage.py bootstrap_roles` | Create/update Owner, Store Manager, Cashier Django Groups with the PRD Section 3 permission matrix |
+| `python manage.py create_role_users` | Create one demo user per role and assign them to the matching Group |

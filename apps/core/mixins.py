@@ -23,24 +23,34 @@ user editing a URL by hand gets a clean 403, not a silent redirect.
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin as DjangoPermissionRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 
 
 class PermissionRequiredMixin(LoginRequiredMixin, DjangoPermissionRequiredMixin):
-    """LoginRequiredMixin + PermissionRequiredMixin, but 403s instead of redirecting once logged in."""
+    """
+    Authenticated users without the permission get HTTP 403.
+    Anonymous users are redirected to login (Django's raise_exception=True
+    would otherwise 403 guests too — we want the login redirect instead).
+    """
 
     raise_exception = True
 
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied
+            return redirect_to_login(
+                self.request.get_full_path(),
+                self.get_login_url(),
+                self.get_redirect_field_name(),
+            )
+        raise PermissionDenied(self.get_permission_denied_message())
 
 
 class GroupRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Restrict a view to one or more of the three StockDesk roles. Superusers always pass."""
 
     allowed_groups = ()
+    raise_exception = True
 
     def test_func(self):
         user = self.request.user
@@ -50,5 +60,9 @@ class GroupRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied
+            return redirect_to_login(
+                self.request.get_full_path(),
+                self.get_login_url(),
+                self.get_redirect_field_name(),
+            )
+        raise PermissionDenied(self.get_permission_denied_message())
