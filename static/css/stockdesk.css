@@ -1,19 +1,38 @@
-/* StockDesk UI — teal / coral retail palette */
+/* StockDesk UI — trust blue + yellow energy + sage/cream calm */
 :root {
-    --sd-ink: #000000;
-    --sd-muted: #5c7380;
-    --sd-teal: #0d8a86;
-    --sd-teal-deep: #0a5f5c;
-    --sd-coral: #e85d4c;
-    --sd-amber: #f0a202;
-    --sd-mint: #e8f7f4;
-    --sd-sky: #d4eef7;
-    --sd-cream: #fff8f0;
+    /* Trust */
+    --sd-blue-deep: #0a2f5c;
+    --sd-blue: #1a4f8c;
+    --sd-blue-light: #5ba3d9;
+    --sd-blue-soft: #e3f0fa;
+
+    /* Energy */
+    --sd-charcoal: #2b2e34;
+    --sd-yellow: #f5c400;
+    --sd-yellow-deep: #d4a800;
+
+    /* Calm */
+    --sd-sage: #7d9b7c;
+    --sd-sage-soft: #e7efe6;
+    --sd-cream: #f7f3ea;
+
+    /* Neutrals */
+    --sd-ink: var(--sd-charcoal);
+    --sd-muted: #5a6270;
     --sd-white: #ffffff;
-    --sd-border: rgba(18, 50, 58, 0.12);
+    --sd-border: rgba(10, 47, 92, 0.12);
+
+    /* Aliases used by existing templates (metric/chip classes) */
+    --sd-teal: var(--sd-blue);
+    --sd-teal-deep: var(--sd-blue-deep);
+    --sd-coral: var(--sd-yellow-deep);
+    --sd-amber: var(--sd-sage);
+    --sd-mint: var(--sd-sage-soft);
+    --sd-sky: var(--sd-blue-soft);
+
     --sd-radius: 1rem;
     --sd-radius-sm: 0.65rem;
-    --sd-shadow: 0 10px 30px rgba(10, 95, 92, 0.12);
+    --sd-shadow: 0 10px 30px rgba(10, 47, 92, 0.12);
     --sd-font-display: "Fraunces", Georgia, serif;
     --sd-font-body: "Figtree", system-ui, sans-serif;
 }
@@ -34,23 +53,22 @@ body.sd-body {
     font-family: var(--sd-font-body);
     color: var(--sd-ink);
     background:
-        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(13, 138, 134, 0.22), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(232, 93, 76, 0.18), transparent 50%),
-        radial-gradient(ellipse 50% 40% at 80% 100%, rgba(240, 162, 2, 0.16), transparent 55%),
-        linear-gradient(165deg, var(--sd-mint) 0%, var(--sd-cream) 45%, var(--sd-sky) 100%);
+        radial-gradient(ellipse 80% 50% at 8% -8%, rgba(91, 163, 217, 0.28), transparent 55%),
+        radial-gradient(ellipse 55% 40% at 100% 0%, rgba(125, 155, 124, 0.18), transparent 50%),
+        radial-gradient(ellipse 50% 40% at 70% 100%, rgba(245, 196, 0, 0.12), transparent 55%),
+        linear-gradient(165deg, var(--sd-cream) 0%, var(--sd-sage-soft) 42%, var(--sd-blue-soft) 100%);
     background-attachment: fixed;
 }
 
-/* subtle grid texture */
 body.sd-body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.35;
+    opacity: 0.3;
     background-image:
-        linear-gradient(rgba(18, 50, 58, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(18, 50, 58, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(10, 47, 92, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10, 47, 92, 0.035) 1px, transparent 1px);
     background-size: 28px 28px;
     z-index: 0;
 }
@@ -60,10 +78,10 @@ body.sd-body > * {
     z-index: 1;
 }
 
-/* ---------- Top bar ---------- */
+/* ---------- Top bar (trust: dark blue) ---------- */
 .sd-topbar {
-    background: linear-gradient(105deg, var(--sd-teal-deep) 0%, var(--sd-teal) 55%, #1aa89f 100%);
-    box-shadow: 0 4px 20px rgba(10, 95, 92, 0.25);
+    background: linear-gradient(105deg, var(--sd-blue-deep) 0%, var(--sd-blue) 55%, #2a6bb0 100%);
+    box-shadow: 0 4px 20px rgba(10, 47, 92, 0.28);
     padding: 0.55rem 0;
     margin-bottom: 1.75rem;
 }
@@ -83,16 +101,16 @@ body.sd-body > * {
     width: 2rem;
     height: 2rem;
     border-radius: 0.55rem;
-    background: linear-gradient(135deg, var(--sd-amber), var(--sd-coral));
+    background: linear-gradient(135deg, var(--sd-yellow), var(--sd-yellow-deep));
     display: inline-grid;
     place-items: center;
     font-size: 0.95rem;
-    color: #fff;
+    color: var(--sd-blue-deep);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .sd-topbar .nav-link {
-    color: rgba(255, 255, 255, 0.88) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
     font-weight: 600;
     border-radius: 999px;
     padding: 0.4rem 0.9rem !important;
@@ -101,7 +119,7 @@ body.sd-body > * {
 
 .sd-topbar .nav-link:hover,
 .sd-topbar .nav-link:focus {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(245, 196, 0, 0.2);
     color: #fff !important;
     transform: translateY(-1px);
 }
@@ -125,13 +143,13 @@ body.sd-body > * {
     border-radius: 999px;
     font-weight: 700;
     padding: 0.35rem 1rem;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .sd-btn-logout:hover {
-    background: var(--sd-coral);
-    border-color: var(--sd-coral);
-    color: #fff;
+    background: var(--sd-yellow);
+    border-color: var(--sd-yellow);
+    color: var(--sd-blue-deep);
     transform: translateY(-1px);
 }
 
@@ -157,7 +175,7 @@ body.sd-body > * {
     margin-bottom: 1.75rem;
 }
 
-/* ---------- Metric tiles (dashboard) ---------- */
+/* ---------- Metric tiles ---------- */
 .sd-metric {
     border: 1px solid var(--sd-border);
     border-radius: var(--sd-radius);
@@ -173,7 +191,7 @@ body.sd-body > * {
 
 .sd-metric:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 36px rgba(10, 95, 92, 0.16);
+    box-shadow: 0 16px 36px rgba(10, 47, 92, 0.16);
 }
 
 .sd-metric::after {
@@ -184,14 +202,14 @@ body.sd-body > * {
     width: 55%;
     height: 90%;
     border-radius: 50%;
-    opacity: 0.18;
+    opacity: 0.16;
     pointer-events: none;
 }
 
-.sd-metric--teal::after { background: var(--sd-teal); }
-.sd-metric--coral::after { background: var(--sd-coral); }
-.sd-metric--amber::after { background: var(--sd-amber); }
-.sd-metric--ink::after { background: #3d7ea6; }
+.sd-metric--teal::after { background: var(--sd-blue); }
+.sd-metric--coral::after { background: var(--sd-yellow); }
+.sd-metric--amber::after { background: var(--sd-sage); }
+.sd-metric--ink::after { background: var(--sd-blue-light); }
 
 .sd-metric:nth-child(1) { animation-delay: 0.05s; }
 .sd-metric:nth-child(2) { animation-delay: 0.12s; }
@@ -215,10 +233,10 @@ body.sd-body > * {
     letter-spacing: -0.03em;
 }
 
-.sd-metric--teal .sd-metric__value { color: var(--sd-teal-deep); }
-.sd-metric--coral .sd-metric__value { color: var(--sd-coral); }
-.sd-metric--amber .sd-metric__value { color: #c48400; }
-.sd-metric--ink .sd-metric__value { color: #2a5f7a; }
+.sd-metric--teal .sd-metric__value { color: var(--sd-blue-deep); }
+.sd-metric--coral .sd-metric__value { color: var(--sd-yellow-deep); }
+.sd-metric--amber .sd-metric__value { color: #4f6b4e; }
+.sd-metric--ink .sd-metric__value { color: var(--sd-blue); }
 
 .sd-metric__icon {
     width: 2.5rem;
@@ -231,16 +249,25 @@ body.sd-body > * {
     color: #fff;
 }
 
-.sd-metric--teal .sd-metric__icon { background: linear-gradient(135deg,#FFDA62); }
-.sd-metric--coral .sd-metric__icon { background: linear-gradient(135deg, #F8B2B2); }
-.sd-metric--amber .sd-metric__icon { background: linear-gradient(135deg, #97DDE9); }
-.sd-metric--ink .sd-metric__icon { background: linear-gradient(135deg,  #C8A96B); }
+.sd-metric--teal .sd-metric__icon {
+    background: linear-gradient(135deg, var(--sd-blue-light), var(--sd-blue-deep));
+}
+.sd-metric--coral .sd-metric__icon {
+    background: linear-gradient(135deg, var(--sd-yellow), var(--sd-yellow-deep));
+    color: var(--sd-blue-deep);
+}
+.sd-metric--amber .sd-metric__icon {
+    background: linear-gradient(135deg, #a8c4a7, var(--sd-sage));
+}
+.sd-metric--ink .sd-metric__icon {
+    background: linear-gradient(135deg, #7eb6df, var(--sd-blue));
+}
 
 .sd-panel {
     margin-top: 1.75rem;
     border: 1px solid var(--sd-border);
     border-radius: var(--sd-radius);
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.86);
     backdrop-filter: blur(8px);
     padding: 1.35rem 1.5rem;
     box-shadow: var(--sd-shadow);
@@ -251,6 +278,7 @@ body.sd-body > * {
     font-family: var(--sd-font-display);
     font-size: 1.25rem;
     margin-bottom: 0.4rem;
+    color: var(--sd-blue-deep);
 }
 
 .sd-chip-row {
@@ -268,21 +296,21 @@ body.sd-body > * {
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 700;
-    background: var(--sd-mint);
-    color: var(--sd-teal-deep);
-    border: 1px solid rgba(13, 138, 134, 0.2);
+    background: var(--sd-blue-soft);
+    color: var(--sd-blue-deep);
+    border: 1px solid rgba(26, 79, 140, 0.2);
 }
 
 .sd-chip--coral {
-    background: F7F4ED;
-    color: #b33a2c;
-    border-color: rgba(232, 93, 76, 0.25);
+    background: #fff6cc;
+    color: #7a6200;
+    border-color: rgba(245, 196, 0, 0.45);
 }
 
 .sd-chip--amber {
-    background: #fff3d6;
-    color: #8a5a00;
-    border-color: rgba(240, 162, 2, 0.3);
+    background: var(--sd-sage-soft);
+    color: #3f5a3e;
+    border-color: rgba(125, 155, 124, 0.35);
 }
 
 /* ---------- Alerts ---------- */
@@ -314,9 +342,9 @@ body.sd-login {
     justify-content: flex-end;
     color: #fff;
     background:
-        linear-gradient(145deg, rgba(10, 95, 92, 0.92) 0%, rgba(13, 138, 134, 0.78) 45%, rgba(232, 93, 76, 0.72) 100%),
-        radial-gradient(circle at 20% 20%, rgba(240, 162, 2, 0.45), transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.15), transparent 35%);
+        linear-gradient(145deg, rgba(10, 47, 92, 0.95) 0%, rgba(26, 79, 140, 0.85) 48%, rgba(125, 155, 124, 0.72) 100%),
+        radial-gradient(circle at 18% 22%, rgba(245, 196, 0, 0.35), transparent 42%),
+        radial-gradient(circle at 82% 70%, rgba(91, 163, 217, 0.35), transparent 40%);
     overflow: hidden;
 }
 
@@ -359,7 +387,7 @@ body.sd-login {
     display: grid;
     place-items: center;
     padding: 2rem 1.5rem;
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(247, 243, 234, 0.72);
     backdrop-filter: blur(10px);
 }
 
@@ -379,6 +407,7 @@ body.sd-login {
     font-weight: 700;
     margin-bottom: 0.25rem;
     letter-spacing: -0.02em;
+    color: var(--sd-blue-deep);
 }
 
 .sd-login-form .sd-form-hint {
@@ -393,19 +422,19 @@ body.sd-login {
 }
 
 .sd-login-form .form-control {
-    border: 2px solid rgba(13, 138, 134, 0.18);
+    border: 2px solid rgba(26, 79, 140, 0.16);
     border-radius: var(--sd-radius-sm);
     padding: 0.7rem 0.9rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sd-login-form .form-control:focus {
-    border-color: var(--sd-teal);
-    box-shadow: 0 0 0 0.2rem rgba(13, 138, 134, 0.18);
+    border-color: var(--sd-blue);
+    box-shadow: 0 0 0 0.2rem rgba(91, 163, 217, 0.28);
 }
 
 .sd-btn-primary {
-    background: linear-gradient(105deg, var(--sd-teal-deep), var(--sd-teal) 60%, #1aa89f);
+    background: linear-gradient(105deg, var(--sd-blue-deep), var(--sd-blue) 55%, #2a6bb0);
     border: none;
     color: #fff;
     font-weight: 800;
@@ -414,21 +443,21 @@ body.sd-login {
     padding: 0.8rem 1rem;
     width: 100%;
     transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 8px 18px rgba(13, 138, 134, 0.28);
+    box-shadow: 0 8px 18px rgba(10, 47, 92, 0.28);
 }
 
 .sd-btn-primary:hover {
-    filter: brightness(1.05);
+    filter: brightness(1.06);
     transform: translateY(-2px);
     color: #fff;
-    box-shadow: 0 12px 24px rgba(13, 138, 134, 0.35);
+    box-shadow: 0 12px 24px rgba(10, 47, 92, 0.35);
 }
 
 .sd-login-accent-bar {
     height: 5px;
     border-radius: 999px;
     margin-bottom: 1.25rem;
-    background: linear-gradient(90deg, var(--sd-teal), var(--sd-amber), var(--sd-coral));
+    background: linear-gradient(90deg, var(--sd-blue), var(--sd-yellow), var(--sd-sage));
 }
 
 @keyframes sd-rise {
@@ -454,7 +483,7 @@ body.sd-login {
     letter-spacing: 0.05em;
     color: var(--sd-muted);
     border-bottom-width: 1px;
-    background: rgba(13, 138, 134, 0.06);
+    background: rgba(26, 79, 140, 0.06);
     padding: 0.85rem 1rem;
 }
 
@@ -465,19 +494,19 @@ body.sd-login {
 }
 
 .sd-table tbody tr:hover {
-    background: rgba(13, 138, 134, 0.04);
+    background: rgba(91, 163, 217, 0.08);
 }
 
 .sd-panel .form-control,
 .sd-panel .form-select {
-    border: 2px solid rgba(13, 138, 134, 0.16);
+    border: 2px solid rgba(26, 79, 140, 0.14);
     border-radius: var(--sd-radius-sm);
 }
 
 .sd-panel .form-control:focus,
 .sd-panel .form-select:focus {
-    border-color: var(--sd-teal);
-    box-shadow: 0 0 0 0.2rem rgba(13, 138, 134, 0.15);
+    border-color: var(--sd-blue);
+    box-shadow: 0 0 0 0.2rem rgba(91, 163, 217, 0.22);
 }
 
 @media (max-width: 900px) {
