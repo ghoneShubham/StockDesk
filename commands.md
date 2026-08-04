@@ -22,3 +22,9 @@ project (Section 14 deliverable).
 | `ALTER USER stockdesk CREATEDB;` | pytest-django needs to create/drop its own `test_stockdesk_dev` database on each run; the app's least-privilege role didn't have that by default |
 | `python manage.py bootstrap_roles` | Create/update Owner, Store Manager, Cashier Django Groups with the PRD Section 3 permission matrix |
 | `python manage.py create_role_users` | Create one demo user per role and assign them to the matching Group |
+
+## Day 5 — Demo dataset
+
+| Command | Why |
+|---|---|
+| `python manage.py seed_demo_data --flush` | Build the PRD §7.1 scale dataset (30 suppliers / 500 products / 200 customers / 800 purchases / 3,000 sales ≈ 50k lines + stock movements). `--flush` clears prior business rows first |

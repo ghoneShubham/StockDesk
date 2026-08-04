@@ -76,15 +76,19 @@ Demo users created by `create_role_users` (local/dev only — rotate before prod
 | `manager` | `ManagerPass123!` | Store Manager |
 | `cashier` | `CashierPass123!` | Cashier |
 
-### 7. (Optional) Seed realistic demo data
+### 7. Seed realistic demo data (Day 5 / PRD §7.1)
 
 ```bash
-python manage.py seed_demo_data
+python manage.py seed_demo_data --flush
 ```
 
-This creates ~30 suppliers, 500 products, 200 customers, 800 purchases, and
-3,000 sales (~50,000 sale lines) spread across 18 months — the dataset all
-performance and report work is tested against (see Section 7.1 of the PRD).
+`--flush` wipes existing business data first, then creates:
+30 suppliers · 500 products · 200 customers · 800 purchases (~4,000 lines) ·
+3,000 sales (~50,000 sale lines) across 18 months, plus matching
+`StockMovement` history (opening stock, purchases, sales).
+
+Takes a few minutes on a laptop. All Day 6+ work should be tested against
+this dataset, not hand-typed rows.
 
 ### 8. Run the dev server
 
