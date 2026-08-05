@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Edit{% else %}Add{% endif %} supplier · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:supplier_list' as suppliers_url %}
+{% url 'masters:index' as masters_url %}
+{% include "includes/back_nav.html" with back_url=suppliers_url back_label="Suppliers" home_url=masters_url home_label="Masters" %}
 <header>
     <h1 class="sd-page-title">{% if object %}Edit supplier{% else %}Add supplier{% endif %}</h1>
 </header>

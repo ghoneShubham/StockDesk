@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}New purchase · StockDesk{% endblock %}
 {% block content %}
+{% url 'purchases:purchase_list' as purchases_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=purchases_url back_label="Purchases" home_url=dashboard_url home_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">New purchase</h1>
     <p class="sd-page-sub">One supplier, many products. Saving increases stock atomically.</p>

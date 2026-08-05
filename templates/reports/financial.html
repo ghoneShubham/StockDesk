@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Financial reports · StockDesk{% endblock %}
 {% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">Financial reports</h1>
     <p class="sd-page-sub">Margin, valuation, and P&amp;L — Owner only. Full report queries arrive on Days 11–12.</p>

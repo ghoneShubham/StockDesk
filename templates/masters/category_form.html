@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Edit{% else %}Add{% endif %} category · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:category_list' as categories_url %}
+{% url 'masters:index' as masters_url %}
+{% include "includes/back_nav.html" with back_url=categories_url back_label="Categories" home_url=masters_url home_label="Masters" %}
 <header>
     <h1 class="sd-page-title">{% if object %}Edit category{% else %}Add category{% endif %}</h1>
 </header>

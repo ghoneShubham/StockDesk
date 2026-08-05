@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Masters · StockDesk{% endblock %}
 {% block content %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">Masters</h1>
     <p class="sd-page-sub">Categories, products, suppliers, and customers.</p>

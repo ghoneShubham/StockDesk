@@ -1,0 +1,18 @@
+{% comment %}
+Usage:
+  {% include "includes/back_nav.html" with back_url=url back_label="Products" %}
+Optional second link:
+  {% include "includes/back_nav.html" with back_url=url back_label="Products" home_url=home home_label="Dashboard" %}
+{% endcomment %}
+<nav class="sd-back-nav" aria-label="Page navigation">
+    <a class="sd-back" href="{{ back_url }}">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        <span>Back{% if back_label %} to {{ back_label }}{% endif %}</span>
+    </a>
+    {% if home_url %}
+    <a class="sd-back sd-back--secondary" href="{{ home_url }}">
+        <i class="bi bi-house-door" aria-hidden="true"></i>
+        <span>{{ home_label|default:"Dashboard" }}</span>
+    </a>
+    {% endif %}
+</nav>

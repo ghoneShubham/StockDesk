@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Customers · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:index' as masters_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=masters_url back_label="Masters" home_url=dashboard_url home_label="Dashboard" %}
 <header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
         <h1 class="sd-page-title">Customers</h1>

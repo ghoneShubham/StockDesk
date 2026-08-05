@@ -160,6 +160,46 @@ body.sd-body > * {
     padding: 0 1.25rem 3rem;
 }
 
+.sd-back-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+}
+
+.sd-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    color: var(--sd-blue-deep);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(26, 79, 140, 0.2);
+    box-shadow: 0 2px 8px rgba(10, 47, 92, 0.08);
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sd-back:hover {
+    background: var(--sd-blue-soft);
+    border-color: rgba(26, 79, 140, 0.35);
+    color: var(--sd-blue-deep);
+    transform: translateX(-2px);
+}
+
+.sd-back--secondary {
+    color: #3f5a3e;
+    border-color: rgba(125, 155, 124, 0.35);
+}
+
+.sd-back--secondary:hover {
+    background: var(--sd-sage-soft);
+    color: #3f5a3e;
+}
+
 .sd-page-title {
     font-family: var(--sd-font-display);
     font-weight: 700;
