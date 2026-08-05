@@ -102,6 +102,9 @@ and database are both reachable.
 Masters CRUD lives at `/masters/` (products, categories, suppliers, customers).
 Product images are stored under `media/` in local development.
 
+Purchases (stock-in) live at `/purchases/` — multi-line formset entry; each save
+writes `StockMovement` rows in the same DB transaction.
+
 ## Running tests
 
 ```bash
