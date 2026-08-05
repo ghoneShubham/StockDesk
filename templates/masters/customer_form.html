@@ -7,7 +7,7 @@
 <header>
     <h1 class="sd-page-title">{% if object %}Edit customer{% else %}Add customer{% endif %}</h1>
 </header>
-<section class="sd-panel" style="max-width:640px;">
+<section class="sd-panel sd-panel--form">
     <form method="post" novalidate>
         {% csrf_token %}
         {% include "masters/_form_fields.html" %}
