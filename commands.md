@@ -28,3 +28,10 @@ project (Section 14 deliverable).
 | Command | Why |
 |---|---|
 | `python manage.py seed_demo_data --flush` | Build the PRD §7.1 scale dataset (30 suppliers / 500 products / 200 customers / 800 purchases / 3,000 sales ≈ 50k lines + stock movements). `--flush` clears prior business rows first |
+
+## Day 7 — Sales concurrency
+
+| Command | Why |
+|---|---|
+| `python scripts/concurrency_proof.py` | Fire two concurrent sales against the last unit of a product; proves one success + one clean `InsufficientStockError` (PRD R2) |
+| `pytest apps/sales/tests.py -q` | Day 7 sales suite: stock-out, atomic rollback, concurrent last-unit, unique invoice numbers |
