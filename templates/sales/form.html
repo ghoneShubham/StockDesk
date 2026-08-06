@@ -48,9 +48,14 @@
     </section>
 
     <section class="sd-panel p-0 overflow-hidden mb-3">
-        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-            <h2 class="h5 mb-0">Line items</h2>
-            <span class="text-muted small">Tab through rows · rates autofill from sale price</span>
+        <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="h5 mb-0">Line items</h2>
+                <span class="text-muted small">Start with one product, then add more as needed</span>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="add-sale-line">
+                <i class="bi bi-plus-lg"></i> Add product
+            </button>
         </div>
         {% if formset.non_form_errors %}
         <div class="alert alert-danger sd-alert m-3 mb-0">
@@ -66,7 +71,6 @@
                         <th style="width:130px;">Rate (₹)</th>
                         <th style="width:130px;">Discount</th>
                         <th style="width:130px;">Amount</th>
-                        <th style="width:70px;">Del</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,20 +95,17 @@
                             {% for e in f.discount.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                         </td>
                         <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
-                        <td class="align-middle">
-                            {% if f.DELETE %}{{ f.DELETE }}{% endif %}
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="4" class="text-end">Subtotal</th>
-                        <th colspan="2"><span id="sale-subtotal" class="fw-bold">₹0.00</span></th>
+                        <th><span id="sale-subtotal" class="fw-bold">₹0.00</span></th>
                     </tr>
                     <tr>
                         <th colspan="4" class="text-end">Total (after discount + tax)</th>
-                        <th colspan="2"><span id="sale-total" class="fw-bold">₹0.00</span></th>
+                        <th><span id="sale-total" class="fw-bold">₹0.00</span></th>
                     </tr>
                 </tfoot>
             </table>
@@ -116,6 +117,22 @@
         <a href="{% url 'sales:sale_list' %}" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
+
+<template id="sale-line-template">
+    <tr class="sale-line">
+        <td>
+            {% with f=formset.empty_form %}
+            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+            {{ f.id }}
+            {{ f.product }}
+            {% endwith %}
+        </td>
+        <td>{{ formset.empty_form.qty }}</td>
+        <td>{{ formset.empty_form.rate }}</td>
+        <td>{{ formset.empty_form.discount }}</td>
+        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+    </tr>
+</template>
 {% endblock %}
 
 {% block extra_js %}
@@ -123,6 +140,10 @@
 <script>
 (function () {
   const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
+  const tbody = document.querySelector("#sale-lines tbody");
+  const totalForms = document.getElementById("id_items-TOTAL_FORMS");
+  const template = document.getElementById("sale-line-template");
+  const addBtn = document.getElementById("add-sale-line");
 
   function money(n) {
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
@@ -151,7 +172,7 @@
     if (totEl) totEl.textContent = "₹" + money(total);
   }
 
-  document.querySelectorAll("#sale-lines tbody tr.sale-line").forEach((row) => {
+  function bindRow(row) {
     const productEl = row.querySelector(".sale-product");
     const rateEl = row.querySelector(".sale-rate");
     if (productEl) {
@@ -173,7 +194,24 @@
     row.querySelectorAll(".sale-qty, .sale-rate, .sale-discount").forEach((el) => {
       el.addEventListener("input", recalc);
     });
-  });
+  }
+
+  function addRow() {
+    const index = parseInt(totalForms.value, 10);
+    const html = template.innerHTML.replace(/__prefix__/g, String(index));
+    const wrap = document.createElement("tbody");
+    wrap.innerHTML = html.trim();
+    const row = wrap.firstElementChild;
+    tbody.appendChild(row);
+    totalForms.value = String(index + 1);
+    bindRow(row);
+    const productEl = row.querySelector(".sale-product");
+    if (productEl) productEl.focus();
+    recalc();
+  }
+
+  document.querySelectorAll("#sale-lines tbody tr.sale-line").forEach(bindRow);
+  if (addBtn) addBtn.addEventListener("click", addRow);
 
   ["id_header_discount", "id_tax"].forEach((id) => {
     const el = document.getElementById(id);

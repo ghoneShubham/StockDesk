@@ -162,8 +162,8 @@ SaleItemFormSet = inlineformset_factory(
     SaleItem,
     form=SaleItemForm,
     formset=BaseSaleItemFormSet,
-    extra=5,
-    can_delete=True,
+    extra=1,
+    can_delete=False,
     min_num=0,
     validate_min=False,
 )
