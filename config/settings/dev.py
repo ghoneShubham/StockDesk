@@ -1,7 +1,7 @@
 from .base import *  # noqa: F401,F403
 from .base import BASE_DIR, MIDDLEWARE, INSTALLED_APPS
 
-DEBUG = True
+DEBUG = False
 
 INSTALLED_APPS += ["debug_toolbar"]
 
