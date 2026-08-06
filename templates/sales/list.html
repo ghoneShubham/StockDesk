@@ -43,8 +43,8 @@
             </thead>
             <tbody>
                 {% for sale in sales %}
-                <tr>
-                    <td><a href="{% url 'sales:sale_detail' sale.pk %}">{{ sale.invoice_no }}</a></td>
+                <tr class="sd-row-link" data-href="{% url 'sales:sale_detail' sale.pk %}" tabindex="0" role="link" aria-label="Open invoice {{ sale.invoice_no }}">
+                    <td>{{ sale.invoice_no }}</td>
                     <td>{{ sale.sale_date|date:"d M Y H:i" }}</td>
                     <td>{% if sale.customer %}{{ sale.customer.name }}{% else %}<span class="text-muted">Walk-in</span>{% endif %}</td>
                     <td>{{ sale.line_count }}</td>

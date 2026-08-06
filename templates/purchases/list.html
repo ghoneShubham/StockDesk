@@ -43,8 +43,8 @@
             </thead>
             <tbody>
                 {% for purchase in purchases %}
-                <tr>
-                    <td><a href="{% url 'purchases:purchase_detail' purchase.pk %}">#{{ purchase.pk }}</a></td>
+                <tr class="sd-row-link" data-href="{% url 'purchases:purchase_detail' purchase.pk %}" tabindex="0" role="link" aria-label="Open purchase #{{ purchase.pk }}">
+                    <td>#{{ purchase.pk }}</td>
                     <td>{{ purchase.purchase_date|date:"d M Y" }}</td>
                     <td>{{ purchase.supplier.name }}</td>
                     <td>{{ purchase.supplier_invoice_no|default:"—" }}</td>

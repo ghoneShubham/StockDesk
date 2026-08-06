@@ -560,6 +560,29 @@ body.sd-login {
     background: rgba(91, 163, 217, 0.08);
 }
 
+.sd-table tbody tr.sd-row-link {
+    cursor: pointer;
+}
+
+.sd-table tbody tr.sd-row-link:hover {
+    background: rgba(91, 163, 217, 0.14);
+}
+
+.sd-table a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.sd-table a:hover {
+    color: var(--sd-blue-deep);
+    text-decoration: none;
+}
+
+.sd-table .sd-row-actions {
+    white-space: nowrap;
+}
+
 .sd-panel .form-control,
 .sd-panel .form-select {
     border: 2px solid rgba(26, 79, 140, 0.14);

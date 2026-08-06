@@ -34,11 +34,11 @@
             <thead><tr><th>Name</th><th>Phone</th><th>Address</th><th></th></tr></thead>
             <tbody>
                 {% for customer in customers %}
-                <tr>
+                <tr{% if perms.masters.change_customer %} class="sd-row-link" data-href="{% url 'masters:customer_update' customer.pk %}" tabindex="0" role="link" aria-label="Edit {{ customer.name }}"{% endif %}>
                     <td>{{ customer.name }}</td>
                     <td>{{ customer.phone }}</td>
                     <td>{{ customer.address|default:"—"|truncatechars:40 }}</td>
-                    <td class="text-end">
+                    <td class="text-end sd-row-actions">
                         {% if perms.masters.change_customer %}
                         <a href="{% url 'masters:customer_update' customer.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% endif %}

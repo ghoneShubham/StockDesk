@@ -34,12 +34,12 @@
             <thead><tr><th>Name</th><th>Phone</th><th>GSTIN</th><th>Active</th><th></th></tr></thead>
             <tbody>
                 {% for supplier in suppliers %}
-                <tr>
+                <tr{% if perms.masters.change_supplier %} class="sd-row-link" data-href="{% url 'masters:supplier_update' supplier.pk %}" tabindex="0" role="link" aria-label="Edit {{ supplier.name }}"{% endif %}>
                     <td>{{ supplier.name }}</td>
                     <td>{{ supplier.phone|default:"—" }}</td>
                     <td>{{ supplier.gstin|default:"—" }}</td>
                     <td>{% if supplier.is_active %}Yes{% else %}No{% endif %}</td>
-                    <td class="text-end">
+                    <td class="text-end sd-row-actions">
                         {% if perms.masters.change_supplier %}
                         <a href="{% url 'masters:supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% if supplier.is_active %}

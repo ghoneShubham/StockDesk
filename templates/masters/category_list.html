@@ -34,10 +34,10 @@
             <thead><tr><th>Name</th><th>Active</th><th></th></tr></thead>
             <tbody>
                 {% for category in categories %}
-                <tr>
+                <tr{% if perms.masters.change_category %} class="sd-row-link" data-href="{% url 'masters:category_update' category.pk %}" tabindex="0" role="link" aria-label="Edit {{ category.name }}"{% endif %}>
                     <td>{{ category.name }}</td>
                     <td>{% if category.is_active %}Yes{% else %}No{% endif %}</td>
-                    <td class="text-end">
+                    <td class="text-end sd-row-actions">
                         {% if perms.masters.change_category %}
                         <a href="{% url 'masters:category_update' category.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% if category.is_active %}
