@@ -108,8 +108,8 @@ PurchaseItemFormSet = inlineformset_factory(
     PurchaseItem,
     form=PurchaseItemForm,
     formset=BasePurchaseItemFormSet,
-    extra=4,
-    can_delete=True,
+    extra=1,
+    can_delete=False,
     min_num=0,
     validate_min=False,
 )

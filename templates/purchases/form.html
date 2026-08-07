@@ -38,9 +38,14 @@
     </section>
 
     <section class="sd-panel p-0 overflow-hidden mb-3">
-        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-            <h2 class="h5 mb-0">Line items</h2>
-            <span class="text-muted small">Qty × rate totals update live</span>
+        <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="h5 mb-0">Line items</h2>
+                <span class="text-muted small">Start with one product, then add more as needed</span>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="add-purchase-line">
+                <i class="bi bi-plus-lg"></i> Add product
+            </button>
         </div>
         {% if formset.non_form_errors %}
         <div class="alert alert-danger sd-alert m-3 mb-0">
@@ -55,7 +60,6 @@
                         <th style="width:120px;">Qty</th>
                         <th style="width:140px;">Rate (₹)</th>
                         <th style="width:140px;">Amount</th>
-                        <th style="width:70px;">Del</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,16 +80,13 @@
                             {% for e in f.rate.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                         </td>
                         <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
-                        <td class="align-middle">
-                            {% if f.DELETE %}{{ f.DELETE }}{% endif %}
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="3" class="text-end">Computed total</th>
-                        <th colspan="2"><span id="purchase-total" class="fw-bold">₹0.00</span></th>
+                        <th><span id="purchase-total" class="fw-bold">₹0.00</span></th>
                     </tr>
                 </tfoot>
             </table>
@@ -97,6 +98,21 @@
         <a href="{% url 'purchases:purchase_list' %}" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
+
+<template id="purchase-line-template">
+    <tr class="purchase-line">
+        <td>
+            {% with f=formset.empty_form %}
+            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+            {{ f.id }}
+            {{ f.product }}
+            {% endwith %}
+        </td>
+        <td>{{ formset.empty_form.qty }}</td>
+        <td>{{ formset.empty_form.rate }}</td>
+        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+    </tr>
+</template>
 {% endblock %}
 
 {% block extra_js %}
@@ -104,6 +120,10 @@
 <script>
 (function () {
   const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
+  const tbody = document.querySelector("#purchase-lines tbody");
+  const totalForms = document.getElementById("id_items-TOTAL_FORMS");
+  const template = document.getElementById("purchase-line-template");
+  const addBtn = document.getElementById("add-purchase-line");
 
   function money(n) {
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
@@ -125,7 +145,7 @@
     if (totalEl) totalEl.textContent = "₹" + money(total);
   }
 
-  document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach((row) => {
+  function bindRow(row) {
     const productEl = row.querySelector(".purchase-product");
     const rateEl = row.querySelector(".purchase-rate");
     if (productEl) {
@@ -147,8 +167,24 @@
     row.querySelectorAll(".purchase-qty, .purchase-rate").forEach((el) => {
       el.addEventListener("input", recalc);
     });
-  });
+  }
 
+  function addRow() {
+    const index = parseInt(totalForms.value, 10);
+    const html = template.innerHTML.replace(/__prefix__/g, String(index));
+    const wrap = document.createElement("tbody");
+    wrap.innerHTML = html.trim();
+    const row = wrap.firstElementChild;
+    tbody.appendChild(row);
+    totalForms.value = String(index + 1);
+    bindRow(row);
+    const productEl = row.querySelector(".purchase-product");
+    if (productEl) productEl.focus();
+    recalc();
+  }
+
+  document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach(bindRow);
+  if (addBtn) addBtn.addEventListener("click", addRow);
   recalc();
 })();
 </script>

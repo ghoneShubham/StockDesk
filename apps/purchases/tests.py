@@ -119,22 +119,13 @@ def test_manager_can_create_purchase_via_form(client, user_factory, catalog):
         "supplier": catalog["supplier"].pk,
         "supplier_invoice_no": "INV-99",
         "purchase_date": timezone.localdate().isoformat(),
-        "items-TOTAL_FORMS": "4",
+        "items-TOTAL_FORMS": "1",
         "items-INITIAL_FORMS": "0",
         "items-MIN_NUM_FORMS": "0",
         "items-MAX_NUM_FORMS": "1000",
         "items-0-product": catalog["p1"].pk,
         "items-0-qty": "4",
         "items-0-rate": "10.00",
-        "items-1-product": "",
-        "items-1-qty": "",
-        "items-1-rate": "",
-        "items-2-product": "",
-        "items-2-qty": "",
-        "items-2-rate": "",
-        "items-3-product": "",
-        "items-3-qty": "",
-        "items-3-rate": "",
     }
     response = client.post(reverse("purchases:purchase_create"), payload)
     assert response.status_code == 302, response.content.decode()[:500]
