@@ -4,18 +4,28 @@
 {% url 'sales:sale_list' as sales_url %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=sales_url back_label="Sales" home_url=dashboard_url home_label="Dashboard" %}
-<header class="mb-3">
-    <h1 class="sd-page-title">{{ sale.invoice_no }}</h1>
-    <p class="sd-page-sub mb-0">
-        {{ sale.sale_date|date:"d M Y H:i" }}
-        · {% if sale.customer %}{{ sale.customer.name }}{% else %}Walk-in{% endif %}
-        · {{ sale.get_payment_status_display }}
-    </p>
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">{{ sale.invoice_no }}</h1>
+        <p class="sd-page-sub mb-0">
+            {{ sale.sale_date|date:"d M Y H:i" }}
+            · {% if sale.customer %}{{ sale.customer.name }}{% else %}Walk-in{% endif %}
+            · {{ sale.get_payment_status_display }}
+        </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'sales:sale_pdf' sale.pk %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;" target="_blank" rel="noopener">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </a>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+        </button>
+    </div>
 </header>
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <section class="sd-panel p-0 overflow-hidden">
+        <section class="sd-panel p-0 overflow-hidden" id="invoice-print">
             <div class="p-3 border-bottom"><h2 class="h5 mb-0">Line items</h2></div>
             <div class="table-responsive">
                 <table class="table sd-table mb-0">
@@ -73,8 +83,9 @@
                 <dt class="col-5">Phone</dt>
                 <dd class="col-7">{{ sale.customer.phone }}</dd>
                 {% endif %}
+                <dt class="col-5">PDF file</dt>
+                <dd class="col-7">{% if sale.pdf %}Stored{% else %}Not generated yet{% endif %}</dd>
             </dl>
-            <p class="text-muted small mt-3 mb-0">Printable PDF arrives on Day 8.</p>
         </section>
         <section class="sd-panel">
             <h2 class="h5">Stock movements</h2>

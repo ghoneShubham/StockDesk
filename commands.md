@@ -35,3 +35,11 @@ project (Section 14 deliverable).
 |---|---|
 | `python scripts/concurrency_proof.py` | Fire two concurrent sales against the last unit of a product; proves one success + one clean `InsufficientStockError` (PRD R2) |
 | `pytest apps/sales/tests.py -q` | Day 7 sales suite: stock-out, atomic rollback, concurrent last-unit, unique invoice numbers |
+
+## Day 8 — Invoice PDF + storage
+
+| Command | Why |
+|---|---|
+| `pip install xhtml2pdf==0.2.16` | Day 8 requirement change: WeasyPrint needs GTK/Pango on Windows and fails to import; xhtml2pdf is the PRD-allowed portable engine |
+| `python manage.py makemigrations sales` | Add `Sale.pdf` FileField for stored invoice PDFs (local media in dev, S3 via django-storages in prod) |
+| `pytest apps/sales/tests.py -q` | Includes PDF generate/store + download permission checks |

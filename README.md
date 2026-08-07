@@ -13,7 +13,7 @@ requirements document and [`docs/`](./docs) for engineering documentation.
 - Python 3.12, Django 5.1
 - PostgreSQL 16 (required in every environment — never SQLite)
 - Django templates + Bootstrap 5 (no SPA framework)
-- WeasyPrint for invoice PDFs
+- xhtml2pdf for invoice PDFs by default (WeasyPrint optional on Linux)
 - django-storages + boto3 for S3 (product images, invoice PDFs) in production
 - gunicorn + nginx + systemd in production
 

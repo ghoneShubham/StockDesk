@@ -1,6 +1,9 @@
+import logging
+
 from django.contrib import messages
 from django.db.models import Count, Prefetch, Q
-from django.shortcuts import redirect, render
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
@@ -10,7 +13,10 @@ from apps.masters.models import Product
 
 from .forms import SaleForm, SaleItemFormSet, lines_from_formset
 from .models import Sale, SaleItem
+from .pdf import ensure_invoice_pdf
 from .services import InsufficientStockError, SaleValidationError, create_sale_with_stock
+
+logger = logging.getLogger("stockdesk.sales")
 
 
 class SaleListView(PermissionRequiredMixin, ListView):
@@ -38,7 +44,7 @@ class SaleListView(PermissionRequiredMixin, ListView):
 
 
 class SaleDetailView(PermissionRequiredMixin, DetailView):
-    """HTML invoice view. Printable PDF + S3 storage arrive on Day 8."""
+    """HTML invoice detail with PDF download (Day 8)."""
 
     model = Sale
     permission_required = "sales.view_sale"
@@ -61,6 +67,38 @@ class SaleDetailView(PermissionRequiredMixin, DetailView):
             .order_by("id")
         )
         return ctx
+
+
+class SaleInvoicePDFView(PermissionRequiredMixin, View):
+    """
+    Stream the stored invoice PDF. Generates + stores it on first request
+    (default storage = local media in dev, S3 in production).
+    """
+
+    permission_required = "sales.view_sale"
+
+    def get(self, request, pk):
+        sale = get_object_or_404(
+            Sale.objects.select_related("customer", "created_by").prefetch_related("items__product"),
+            pk=pk,
+        )
+        try:
+            sale = ensure_invoice_pdf(sale)
+        except Exception:
+            logger.exception("Failed to build PDF for sale %s", sale.invoice_no)
+            messages.error(request, "Could not generate the invoice PDF. Please try again.")
+            return redirect(reverse("sales:sale_detail", kwargs={"pk": sale.pk}))
+
+        if not sale.pdf:
+            raise Http404("Invoice PDF not available.")
+
+        response = FileResponse(
+            sale.pdf.open("rb"),
+            content_type="application/pdf",
+            as_attachment=False,
+            filename=f"{sale.invoice_no}.pdf",
+        )
+        return response
 
 
 class SaleCreateView(PermissionRequiredMixin, View):
@@ -89,10 +127,20 @@ class SaleCreateView(PermissionRequiredMixin, View):
                 messages.error(request, str(exc))
                 return self._render(request, form, formset)
 
-            messages.success(
-                request,
-                f"Invoice {sale.invoice_no} saved — stock reduced for {sale.items.count()} line(s).",
-            )
+            try:
+                ensure_invoice_pdf(sale)
+            except Exception:
+                logger.exception("Sale %s saved but PDF generation failed", sale.invoice_no)
+                messages.warning(
+                    request,
+                    f"Invoice {sale.invoice_no} saved, but the PDF could not be generated yet. "
+                    "Open the invoice and use Download PDF to retry.",
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Invoice {sale.invoice_no} saved — stock reduced for {sale.items.count()} line(s).",
+                )
             return redirect(reverse("sales:sale_detail", kwargs={"pk": sale.pk}))
 
         messages.error(request, "Please fix the errors below.")

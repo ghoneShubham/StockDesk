@@ -341,3 +341,65 @@ def test_next_invoice_no_is_sequential(db):
     assert a.endswith("000001")
     assert b.endswith("000002")
     assert InvoiceSequence.objects.get(financial_year=fy).last_number == 2
+
+
+@pytest.mark.django_db
+def test_ensure_invoice_pdf_stores_file(user_factory, catalog, settings, tmp_path):
+    from apps.sales.pdf import ensure_invoice_pdf
+
+    settings.MEDIA_ROOT = tmp_path
+    settings.INVOICE_PDF_ENGINE = "xhtml2pdf"
+    owner = user_factory("owner_pdf", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("3"))
+    sale = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        user=owner,
+    )
+    ensure_invoice_pdf(sale)
+    sale.refresh_from_db()
+    assert sale.pdf
+    assert sale.pdf.name.endswith(".pdf")
+    assert sale.pdf.size > 100
+    # Second call should reuse the stored file.
+    name_before = sale.pdf.name
+    ensure_invoice_pdf(sale)
+    sale.refresh_from_db()
+    assert sale.pdf.name == name_before
+
+
+@pytest.mark.django_db
+def test_cashier_can_download_invoice_pdf(client, user_factory, catalog, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    settings.INVOICE_PDF_ENGINE = "xhtml2pdf"
+    owner = user_factory("owner_pdf2", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("2"))
+    sale = create_sale_with_stock(
+        customer=None,
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        user=owner,
+    )
+    user_factory("cashier_pdf", CASHIER)
+    assert client.login(username="cashier_pdf", password="pass1234!")
+    response = client.get(reverse("sales:sale_pdf", kwargs={"pk": sale.pk}))
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/pdf"
+    sale.refresh_from_db()
+    assert sale.pdf
+
+
+@pytest.mark.django_db
+def test_anonymous_cannot_download_invoice_pdf(client, user_factory, catalog):
+    owner = user_factory("owner_pdf3", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("1"))
+    sale = create_sale_with_stock(
+        customer=None,
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        user=owner,
+    )
+    response = client.get(reverse("sales:sale_pdf", kwargs={"pk": sale.pk}))
+    assert response.status_code == 302
+    assert "/login" in response.url

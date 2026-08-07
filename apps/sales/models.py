@@ -6,6 +6,12 @@ from django.db import models
 from apps.masters.models import Customer, Product
 
 
+def invoice_pdf_upload_to(instance, filename):
+    # Keep invoice PDFs under a stable prefix so S3 IAM can scope to media/invoices/*
+    safe_no = (instance.invoice_no or "draft").replace("/", "-")
+    return f"invoices/{safe_no}.pdf"
+
+
 class InvoiceSequence(models.Model):
     """
     One locked counter row per financial year. `apps.sales.services.next_invoice_no`
@@ -42,6 +48,8 @@ class Sale(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="sales"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    # Stored via default storage: local MEDIA in dev, S3 in production (Day 8).
+    pdf = models.FileField(upload_to=invoice_pdf_upload_to, blank=True, null=True)
 
     class Meta:
         ordering = ["-sale_date", "-id"]
