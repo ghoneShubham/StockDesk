@@ -33,6 +33,15 @@
                 <dt class="col-sm-4">Purchase price</dt><dd class="col-sm-8">₹{{ product.purchase_price }}</dd>
                 {% endif %}
                 <dt class="col-sm-4">Sale price</dt><dd class="col-sm-8">₹{{ product.sale_price }}</dd>
+                <dt class="col-sm-4">In stock</dt>
+                <dd class="col-sm-8">
+                    {% if stock_qty <= product.reorder_level %}
+                    <span class="text-danger fw-semibold">{{ stock_qty }}</span>
+                    <span class="text-muted small ms-1">(at or below reorder)</span>
+                    {% else %}
+                    <span class="fw-semibold">{{ stock_qty }}</span>
+                    {% endif %}
+                </dd>
                 <dt class="col-sm-4">Reorder level</dt><dd class="col-sm-8">{{ product.reorder_level }}</dd>
                 <dt class="col-sm-4">Sellable</dt><dd class="col-sm-8">{% if product.sellable %}Yes{% else %}No{% endif %}</dd>
                 <dt class="col-sm-4">Active</dt><dd class="col-sm-8">{% if product.is_active %}Yes{% else %}No{% endif %}</dd>

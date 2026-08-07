@@ -1,13 +1,28 @@
+from decimal import Decimal
+
 from django.contrib import messages
-from django.db.models import ProtectedError, Q
+from django.db.models import DecimalField, ProtectedError, Q, Sum, Value
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView, View
 
 from apps.core.mixins import PermissionRequiredMixin
+from apps.inventory.models import StockMovement
 
 from .forms import CategoryForm, CustomerForm, ProductForm, SupplierForm
 from .models import Category, Customer, Product, Supplier
+
+
+def annotate_stock_qty(queryset):
+    """Current stock = sum of StockMovement.qty_delta (PRD R1)."""
+    return queryset.annotate(
+        stock_qty=Coalesce(
+            Sum("stock_movements__qty_delta"),
+            Value(Decimal("0.00")),
+            output_field=DecimalField(max_digits=14, decimal_places=2),
+        )
+    )
 
 
 class MastersIndexView(PermissionRequiredMixin, TemplateView):
@@ -79,7 +94,7 @@ class ProductListView(PermissionRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Product.objects.select_related("category")
+        qs = annotate_stock_qty(Product.objects.select_related("category")).order_by("name")
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(Q(sku__icontains=q) | Q(name__icontains=q) | Q(hsn_code__icontains=q))
@@ -105,11 +120,18 @@ class ProductDetailView(PermissionRequiredMixin, DetailView):
     context_object_name = "product"
 
     def get_queryset(self):
-        return Product.objects.select_related("category")
+        return annotate_stock_qty(Product.objects.select_related("category"))
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["can_view_purchase_price"] = self.request.user.has_perm("masters.view_purchase_price")
+        stock = getattr(self.object, "stock_qty", None)
+        if stock is None:
+            stock = (
+                StockMovement.objects.filter(product=self.object).aggregate(s=Sum("qty_delta"))["s"]
+                or Decimal("0.00")
+            )
+        ctx["stock_qty"] = stock
         return ctx
 
 
