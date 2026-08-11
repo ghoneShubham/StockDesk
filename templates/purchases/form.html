@@ -1,87 +1,12 @@
 {% extends "base.html" %}
 {% block title %}New purchase · StockDesk{% endblock %}
-{% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<style>
-  /* Keep closed control looking like a normal Bootstrap form-select */
-  .sd-panel .ts-wrapper.single .ts-control,
-  #purchase-lines .ts-wrapper.single .ts-control {
-    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
-    min-height: calc(1.5em + 0.75rem + 4px);
-    border: 2px solid rgba(26, 79, 140, 0.14);
-    border-radius: var(--sd-radius-sm, 0.65rem);
-    background-color: #fff;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 16px 12px;
-    box-shadow: none;
-    font-size: 1rem;
-    line-height: 1.5;
-    cursor: pointer;
-  }
-  .sd-panel .ts-wrapper.single.focus .ts-control,
-  #purchase-lines .ts-wrapper.single.focus .ts-control {
-    border-color: var(--sd-blue, #1a4f8c);
-    box-shadow: 0 0 0 0.2rem rgba(91, 163, 217, 0.22);
-  }
-  .sd-panel .ts-wrapper.single .ts-control .item,
-  #purchase-lines .ts-wrapper.single .ts-control .item {
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-  }
-  .sd-panel .ts-wrapper.single .ts-control input,
-  #purchase-lines .ts-wrapper.single .ts-control input {
-    display: none !important;
-  }
-  .ts-dropdown {
-    border: 1px solid rgba(26, 79, 140, 0.2);
-    border-radius: var(--sd-radius-sm, 0.65rem);
-    box-shadow: 0 8px 24px rgba(10, 47, 92, 0.12);
-    z-index: 2000;
-  }
-  .ts-dropdown .dropdown-input-wrap {
-    padding: 0.5rem;
-    border-bottom: 1px solid rgba(26, 79, 140, 0.1);
-    background: #fff;
-  }
-  .ts-dropdown .dropdown-input {
-    width: 100%;
-    border: 2px solid rgba(26, 79, 140, 0.14);
-    border-radius: var(--sd-radius-sm, 0.65rem);
-    padding: 0.4rem 0.65rem;
-    font-size: 0.95rem;
-  }
-  .ts-dropdown .dropdown-input:focus {
-    outline: none;
-    border-color: var(--sd-blue, #1a4f8c);
-    box-shadow: 0 0 0 0.15rem rgba(91, 163, 217, 0.22);
-  }
-  .ts-dropdown .option {
-    padding: 0.45rem 0.75rem;
-  }
-  .ts-dropdown .option.active {
-    background: rgba(91, 163, 217, 0.16);
-    color: var(--sd-blue-deep, #0a2f5c);
-  }
-  #purchase-lines .ts-wrapper {
-    min-width: 240px;
-  }
-  .ts-wrapper.form-select {
-    padding: 0;
-    border: 0;
-    background: none;
-  }
-</style>
-{% endblock %}
 {% block content %}
 {% url 'purchases:purchase_list' as purchases_url %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=purchases_url back_label="Purchases" home_url=dashboard_url home_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">New purchase</h1>
-    <p class="sd-page-sub">One supplier, many products. Open a dropdown and type to filter the list.</p>
+    <p class="sd-page-sub">One supplier, many products. Click a dropdown, then type to jump to a matching name or SKU.</p>
 </header>
 
 <form method="post" novalidate id="purchase-form">
@@ -131,7 +56,7 @@
             <table class="table sd-table mb-0" id="purchase-lines">
                 <thead>
                     <tr>
-                        <th style="min-width:260px;">Product</th>
+                        <th style="min-width:240px;">Product</th>
                         <th style="width:120px;">Qty</th>
                         <th style="width:140px;">Rate (₹)</th>
                         <th style="width:140px;">Amount</th>
@@ -192,7 +117,6 @@
 
 {% block extra_js %}
 {{ product_prices|json_script:"product-prices-data" }}
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 (function () {
   const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
@@ -205,23 +129,49 @@
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
   }
 
-  function enhanceSelect(el) {
-    if (!el || el.tomselect || typeof TomSelect === "undefined") return null;
-    return new TomSelect(el, {
-      create: false,
-      allowEmptyOption: true,
-      maxOptions: 500,
-      // Search lives inside the open dropdown; closed control looks like a normal select.
-      plugins: ["dropdown_input"],
-      sortField: { field: "text", direction: "asc" },
-      render: {
-        option: function (data, escape) {
-          return "<div>" + escape(data.text) + "</div>";
-        },
-        item: function (data, escape) {
-          return "<div>" + escape(data.text) + "</div>";
-        },
-      },
+  /**
+   * Keep the native <select> list/UI. While focused, typing characters
+   * selects the first option whose label contains the typed text (SKU or name).
+   */
+  function enableTypeToSelect(select) {
+    if (!select || select.dataset.typeSelectBound === "1") return;
+    select.dataset.typeSelectBound = "1";
+    let buffer = "";
+    let clearTimer = null;
+
+    select.addEventListener("keydown", function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "Escape") {
+        buffer = "";
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        buffer = buffer.slice(0, -1);
+      } else if (e.key.length === 1) {
+        e.preventDefault();
+        buffer += e.key.toLowerCase();
+      } else {
+        return;
+      }
+
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(function () { buffer = ""; }, 1200);
+      if (!buffer) return;
+
+      const options = Array.from(select.options);
+      let match = options.find(function (opt) {
+        return opt.value && opt.text.toLowerCase().startsWith(buffer);
+      });
+      if (!match) {
+        match = options.find(function (opt) {
+          return opt.value && opt.text.toLowerCase().includes(buffer);
+        });
+      }
+      if (match && select.value !== match.value) {
+        select.value = match.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }
     });
   }
 
@@ -244,19 +194,17 @@
   function bindRow(row) {
     const productEl = row.querySelector(".purchase-product");
     const rateEl = row.querySelector(".purchase-rate");
-    const ts = enhanceSelect(productEl);
-
-    function onProductChange() {
-      const price = prices[productEl.value];
-      if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
-        rateEl.value = price;
-        rateEl.dataset.autofilled = "1";
-      }
-      recalc();
-    }
+    enableTypeToSelect(productEl);
 
     if (productEl) {
-      productEl.addEventListener("change", onProductChange);
+      productEl.addEventListener("change", () => {
+        const price = prices[productEl.value];
+        if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
+          rateEl.value = price;
+          rateEl.dataset.autofilled = "1";
+        }
+        recalc();
+      });
     }
     if (rateEl) {
       rateEl.addEventListener("input", () => {
@@ -267,7 +215,6 @@
     row.querySelectorAll(".purchase-qty, .purchase-rate").forEach((el) => {
       el.addEventListener("input", recalc);
     });
-    return ts;
   }
 
   function addRow() {
@@ -278,12 +225,13 @@
     const row = wrap.firstElementChild;
     tbody.appendChild(row);
     totalForms.value = String(index + 1);
-    const ts = bindRow(row);
-    if (ts) ts.open();
+    bindRow(row);
+    const productEl = row.querySelector(".purchase-product");
+    if (productEl) productEl.focus();
     recalc();
   }
 
-  enhanceSelect(document.getElementById("id_supplier"));
+  enableTypeToSelect(document.getElementById("id_supplier"));
   document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach(bindRow);
   if (addBtn) addBtn.addEventListener("click", addRow);
   recalc();

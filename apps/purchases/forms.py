@@ -12,12 +12,7 @@ class PurchaseForm(forms.ModelForm):
         model = Purchase
         fields = ("supplier", "supplier_invoice_no", "purchase_date")
         widgets = {
-            "supplier": forms.Select(
-                attrs={
-                    "class": "form-select sd-search-select",
-                    "data-placeholder": "Type supplier name to search…",
-                }
-            ),
+            "supplier": forms.Select(attrs={"class": "form-select"}),
             "supplier_invoice_no": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Supplier invoice / bill no."}
             ),
@@ -35,12 +30,7 @@ class PurchaseItemForm(forms.ModelForm):
         model = PurchaseItem
         fields = ("product", "qty", "rate")
         widgets = {
-            "product": forms.Select(
-                attrs={
-                    "class": "form-select purchase-product sd-search-select",
-                    "data-placeholder": "Type SKU or product name…",
-                }
-            ),
+            "product": forms.Select(attrs={"class": "form-select purchase-product"}),
             "qty": forms.NumberInput(
                 attrs={"class": "form-control purchase-qty", "step": "0.01", "min": "0.01"}
             ),
