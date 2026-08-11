@@ -1,12 +1,29 @@
 {% extends "base.html" %}
 {% block title %}New purchase · StockDesk{% endblock %}
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+  .ts-wrapper.form-select { padding: 0; border: none; background: transparent; }
+  .ts-wrapper .ts-control {
+    border: 2px solid rgba(26, 79, 140, 0.14);
+    border-radius: var(--sd-radius-sm, 0.65rem);
+    min-height: 2.5rem;
+    background: #fff;
+  }
+  .ts-wrapper.focus .ts-control {
+    border-color: var(--sd-blue, #1a4f8c);
+    box-shadow: 0 0 0 0.2rem rgba(91, 163, 217, 0.22);
+  }
+  #purchase-lines .ts-wrapper { min-width: 220px; }
+</style>
+{% endblock %}
 {% block content %}
 {% url 'purchases:purchase_list' as purchases_url %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=purchases_url back_label="Purchases" home_url=dashboard_url home_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">New purchase</h1>
-    <p class="sd-page-sub">One supplier, many products. Saving increases stock atomically.</p>
+    <p class="sd-page-sub">One supplier, many products. Type in the dropdowns to search by name or SKU.</p>
 </header>
 
 <form method="post" novalidate id="purchase-form">
@@ -56,7 +73,7 @@
             <table class="table sd-table mb-0" id="purchase-lines">
                 <thead>
                     <tr>
-                        <th style="min-width:240px;">Product</th>
+                        <th style="min-width:260px;">Product</th>
                         <th style="width:120px;">Qty</th>
                         <th style="width:140px;">Rate (₹)</th>
                         <th style="width:140px;">Amount</th>
@@ -117,6 +134,7 @@
 
 {% block extra_js %}
 {{ product_prices|json_script:"product-prices-data" }}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 (function () {
   const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
@@ -127,6 +145,18 @@
 
   function money(n) {
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+  }
+
+  function enhanceSelect(el) {
+    if (!el || el.tomselect || typeof TomSelect === "undefined") return null;
+    return new TomSelect(el, {
+      create: false,
+      allowEmptyOption: true,
+      maxOptions: 500,
+      placeholder: el.dataset.placeholder || "Type to search…",
+      plugins: ["clear_button"],
+      sortField: { field: "text", direction: "asc" },
+    });
   }
 
   function recalc() {
@@ -148,15 +178,19 @@
   function bindRow(row) {
     const productEl = row.querySelector(".purchase-product");
     const rateEl = row.querySelector(".purchase-rate");
+    const ts = enhanceSelect(productEl);
+
+    function onProductChange() {
+      const price = prices[productEl.value];
+      if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
+        rateEl.value = price;
+        rateEl.dataset.autofilled = "1";
+      }
+      recalc();
+    }
+
     if (productEl) {
-      productEl.addEventListener("change", () => {
-        const price = prices[productEl.value];
-        if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
-          rateEl.value = price;
-          rateEl.dataset.autofilled = "1";
-        }
-        recalc();
-      });
+      productEl.addEventListener("change", onProductChange);
     }
     if (rateEl) {
       rateEl.addEventListener("input", () => {
@@ -167,6 +201,7 @@
     row.querySelectorAll(".purchase-qty, .purchase-rate").forEach((el) => {
       el.addEventListener("input", recalc);
     });
+    return ts;
   }
 
   function addRow() {
@@ -177,12 +212,16 @@
     const row = wrap.firstElementChild;
     tbody.appendChild(row);
     totalForms.value = String(index + 1);
-    bindRow(row);
-    const productEl = row.querySelector(".purchase-product");
-    if (productEl) productEl.focus();
+    const ts = bindRow(row);
+    if (ts) ts.focus();
+    else {
+      const productEl = row.querySelector(".purchase-product");
+      if (productEl) productEl.focus();
+    }
     recalc();
   }
 
+  enhanceSelect(document.getElementById("id_supplier"));
   document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach(bindRow);
   if (addBtn) addBtn.addEventListener("click", addRow);
   recalc();
