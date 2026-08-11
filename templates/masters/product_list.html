@@ -76,6 +76,9 @@
                     </td>
                     <td>{{ product.reorder_level }}</td>
                     <td class="text-end sd-row-actions">
+                        {% if perms.inventory.view_stockmovement %}
+                        <a href="{% url 'inventory:product_stock_history' product.pk %}" class="btn btn-sm btn-outline-primary">History</a>
+                        {% endif %}
                         {% if perms.masters.change_product %}
                         <a href="{% url 'masters:product_update' product.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% endif %}

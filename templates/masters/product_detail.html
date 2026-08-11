@@ -9,7 +9,10 @@
         <h1 class="sd-page-title">{{ product.name }}</h1>
         <p class="sd-page-sub mb-0"><code>{{ product.sku }}</code> · {{ product.category.name }}</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
+        {% if perms.inventory.view_stockmovement %}
+        <a href="{% url 'inventory:product_stock_history' product.pk %}" class="btn btn-outline-primary">Stock history</a>
+        {% endif %}
         {% if perms.masters.change_product %}
         <a href="{% url 'masters:product_update' product.pk %}" class="btn btn-outline-secondary">Edit</a>
         {% if product.is_active %}

@@ -43,3 +43,11 @@ project (Section 14 deliverable).
 | `pip install xhtml2pdf==0.2.16` | Day 8 requirement change: WeasyPrint needs GTK/Pango on Windows and fails to import; xhtml2pdf is the PRD-allowed portable engine |
 | `python manage.py makemigrations sales` | Add `Sale.pdf` FileField for stored invoice PDFs (local media in dev, S3 via django-storages in prod) |
 | `pytest apps/sales/tests.py -q` | Includes PDF generate/store + download permission checks |
+
+## Day 9 — Adjustments & reconciliation
+
+| Command | Why |
+|---|---|
+| `python manage.py reconcile_stock` | Verify purchases/sales/adjustments match StockMovement rows; report orphans and negative stock (PRD R1) |
+| `python manage.py reconcile_stock --fail-on-drift` | Same check, non-zero exit if any drift — useful for cron later |
+| `pytest apps/inventory/tests.py -q` | Day 9 suite: adjustments, stock history permissions, reconcile command |

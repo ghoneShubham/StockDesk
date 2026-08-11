@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}New adjustment · StockDesk{% endblock %}
+{% block content %}
+{% url 'inventory:adjustment_list' as adj_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=adj_url back_label="Adjustments" home_url=dashboard_url home_label="Dashboard" %}
+<header>
+    <h1 class="sd-page-title">New adjustment</h1>
+    <p class="sd-page-sub">Reason is required. Saving updates the stock ledger in the same transaction.</p>
+</header>
+
+<section class="sd-panel sd-panel--form">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.product.id_for_label }}">Product *</label>
+            {{ form.product }}
+            {% for e in form.product.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.qty_delta.id_for_label }}">Quantity change *</label>
+            {{ form.qty_delta }}
+            {% if form.qty_delta.help_text %}<div class="form-text">{{ form.qty_delta.help_text }}</div>{% endif %}
+            {% for e in form.qty_delta.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.reason.id_for_label }}">Reason *</label>
+            {{ form.reason }}
+            {% for e in form.reason.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.notes.id_for_label }}">Notes</label>
+            {{ form.notes }}
+            {% for e in form.notes.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger sd-alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="d-flex gap-2">
+            <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.7rem 1.4rem;">Save adjustment</button>
+            <a href="{% url 'inventory:adjustment_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

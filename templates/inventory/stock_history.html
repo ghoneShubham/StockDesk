@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Stock history · {{ product.sku }} · StockDesk{% endblock %}
+{% block content %}
+{% url 'masters:product_detail' product.pk as product_url %}
+{% url 'masters:product_list' as products_url %}
+{% include "includes/back_nav.html" with back_url=product_url back_label="Product" home_url=products_url home_label="Products" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Stock history</h1>
+        <p class="sd-page-sub mb-0">
+            <code>{{ product.sku }}</code> — {{ product.name }}
+            · Current stock:
+            {% if current_stock <= product.reorder_level %}
+            <span class="text-danger fw-semibold">{{ current_stock }}</span>
+            {% else %}
+            <span class="fw-semibold">{{ current_stock }}</span>
+            {% endif %}
+        </p>
+    </div>
+    {% if can_adjust %}
+    <a href="{% url 'inventory:adjustment_create' %}?product={{ product.pk }}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
+        <i class="bi bi-plus-lg"></i> Adjust stock
+    </a>
+    {% endif %}
+</header>
+
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Type</th>
+                    <th>Reference</th>
+                    <th>Reason</th>
+                    <th>Change</th>
+                    <th>Balance</th>
+                    <th>By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in history_rows %}
+                <tr>
+                    <td>{{ row.movement.created_at|date:"d M Y H:i" }}</td>
+                    <td>{{ row.movement.get_movement_type_display }}</td>
+                    <td>
+                        {% if row.movement.reference_type == "purchase" %}
+                        <a href="{% url 'purchases:purchase_detail' row.movement.reference_id %}">Purchase #{{ row.movement.reference_id }}</a>
+                        {% elif row.movement.reference_type == "sale" %}
+                        <a href="{% url 'sales:sale_detail' row.movement.reference_id %}">Sale #{{ row.movement.reference_id }}</a>
+                        {% elif row.movement.reference_type == "adjustment" %}
+                        <a href="{% url 'inventory:adjustment_detail' row.movement.reference_id %}">Adj #{{ row.movement.reference_id }}</a>
+                        {% else %}
+                        {{ row.movement.reference_type }} #{{ row.movement.reference_id }}
+                        {% endif %}
+                    </td>
+                    <td>{{ row.movement.reason|default:"—" }}</td>
+                    <td>
+                        {% if row.movement.qty_delta < 0 %}
+                        <span class="text-danger">{{ row.movement.qty_delta }}</span>
+                        {% else %}
+                        <span class="text-success">+{{ row.movement.qty_delta }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="fw-semibold">{{ row.balance }}</td>
+                    <td>{{ row.movement.created_by|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-muted p-4">No stock movements for this product yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
