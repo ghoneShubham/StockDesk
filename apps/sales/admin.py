@@ -16,7 +16,7 @@ class SaleAdmin(admin.ModelAdmin):
     search_fields = ("invoice_no", "customer__name", "customer__phone")
     autocomplete_fields = ("customer",)
     date_hierarchy = "sale_date"
-    readonly_fields = ("invoice_no", "created_by", "created_at")
+    readonly_fields = ("invoice_no", "created_by", "created_at", "pdf")
     inlines = [SaleItemInline]
 
 

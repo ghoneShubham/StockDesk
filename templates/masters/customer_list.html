@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Customers · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:index' as masters_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=masters_url back_label="Masters" home_url=dashboard_url home_label="Dashboard" %}
 <header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
         <h1 class="sd-page-title">Customers</h1>
@@ -31,11 +34,11 @@
             <thead><tr><th>Name</th><th>Phone</th><th>Address</th><th></th></tr></thead>
             <tbody>
                 {% for customer in customers %}
-                <tr>
+                <tr{% if perms.masters.change_customer %} class="sd-row-link" data-href="{% url 'masters:customer_update' customer.pk %}" tabindex="0" role="link" aria-label="Edit {{ customer.name }}"{% endif %}>
                     <td>{{ customer.name }}</td>
                     <td>{{ customer.phone }}</td>
                     <td>{{ customer.address|default:"—"|truncatechars:40 }}</td>
-                    <td class="text-end">
+                    <td class="text-end sd-row-actions">
                         {% if perms.masters.change_customer %}
                         <a href="{% url 'masters:customer_update' customer.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% endif %}

@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Edit{% else %}Add{% endif %} product · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:product_list' as products_url %}
+{% url 'masters:index' as masters_url %}
+{% include "includes/back_nav.html" with back_url=products_url back_label="Products" home_url=masters_url home_label="Masters" %}
 <header>
     <h1 class="sd-page-title">{% if object %}Edit product{% else %}Add product{% endif %}</h1>
     <p class="sd-page-sub">{% if object %}{{ object.sku }} — {{ object.name }}{% else %}Create a catalog item with optional image.{% endif %}</p>
 </header>
-<section class="sd-panel" style="max-width:720px;">
+<section class="sd-panel sd-panel--form-wide">
     <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {% include "masters/_form_fields.html" %}

@@ -1,37 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Masters · StockDesk{% endblock %}
 {% block content %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">Masters</h1>
     <p class="sd-page-sub">Categories, products, suppliers, and customers.</p>
 </header>
-<div class="row g-3">
-    <div class="col-md-6 col-lg-3">
-        <a href="{% url 'masters:product_list' %}" class="sd-metric sd-metric--teal text-decoration-none d-block">
+<div class="row g-4">
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'masters:product_list' %}" class="sd-metric sd-metric--teal text-decoration-none">
             <div class="sd-metric__icon"><i class="bi bi-box-seam"></i></div>
             <div class="sd-metric__label">Products</div>
-            <div class="sd-metric__value" style="font-size:1.25rem;">Browse</div>
+            <div class="sd-metric__value">Browse catalog</div>
         </a>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <a href="{% url 'masters:category_list' %}" class="sd-metric sd-metric--amber text-decoration-none d-block">
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'masters:category_list' %}" class="sd-metric sd-metric--amber text-decoration-none">
             <div class="sd-metric__icon"><i class="bi bi-tags"></i></div>
             <div class="sd-metric__label">Categories</div>
-            <div class="sd-metric__value" style="font-size:1.25rem;">Browse</div>
+            <div class="sd-metric__value">Browse groups</div>
         </a>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <a href="{% url 'masters:supplier_list' %}" class="sd-metric sd-metric--coral text-decoration-none d-block">
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'masters:supplier_list' %}" class="sd-metric sd-metric--coral text-decoration-none">
             <div class="sd-metric__icon"><i class="bi bi-truck"></i></div>
             <div class="sd-metric__label">Suppliers</div>
-            <div class="sd-metric__value" style="font-size:1.25rem;">Browse</div>
+            <div class="sd-metric__value">Browse vendors</div>
         </a>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <a href="{% url 'masters:customer_list' %}" class="sd-metric sd-metric--ink text-decoration-none d-block">
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'masters:customer_list' %}" class="sd-metric sd-metric--ink text-decoration-none">
             <div class="sd-metric__icon"><i class="bi bi-people"></i></div>
             <div class="sd-metric__label">Customers</div>
-            <div class="sd-metric__value" style="font-size:1.25rem;">Browse</div>
+            <div class="sd-metric__value">Browse buyers</div>
         </a>
     </div>
 </div>

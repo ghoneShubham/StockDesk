@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{% if object %}Edit{% else %}Add{% endif %} customer · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:customer_list' as customers_url %}
+{% url 'masters:index' as masters_url %}
+{% include "includes/back_nav.html" with back_url=customers_url back_label="Customers" home_url=masters_url home_label="Masters" %}
 <header>
     <h1 class="sd-page-title">{% if object %}Edit customer{% else %}Add customer{% endif %}</h1>
 </header>
-<section class="sd-panel" style="max-width:640px;">
+<section class="sd-panel sd-panel--form">
     <form method="post" novalidate>
         {% csrf_token %}
         {% include "masters/_form_fields.html" %}

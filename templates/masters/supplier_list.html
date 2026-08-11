@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Suppliers · StockDesk{% endblock %}
 {% block content %}
+{% url 'masters:index' as masters_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=masters_url back_label="Masters" home_url=dashboard_url home_label="Dashboard" %}
 <header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
         <h1 class="sd-page-title">Suppliers</h1>
@@ -31,12 +34,12 @@
             <thead><tr><th>Name</th><th>Phone</th><th>GSTIN</th><th>Active</th><th></th></tr></thead>
             <tbody>
                 {% for supplier in suppliers %}
-                <tr>
+                <tr{% if perms.masters.change_supplier %} class="sd-row-link" data-href="{% url 'masters:supplier_update' supplier.pk %}" tabindex="0" role="link" aria-label="Edit {{ supplier.name }}"{% endif %}>
                     <td>{{ supplier.name }}</td>
                     <td>{{ supplier.phone|default:"—" }}</td>
                     <td>{{ supplier.gstin|default:"—" }}</td>
                     <td>{% if supplier.is_active %}Yes{% else %}No{% endif %}</td>
-                    <td class="text-end">
+                    <td class="text-end sd-row-actions">
                         {% if perms.masters.change_supplier %}
                         <a href="{% url 'masters:supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         {% if supplier.is_active %}

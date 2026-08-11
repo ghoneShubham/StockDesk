@@ -1,12 +1,76 @@
 {% extends "base.html" %}
 {% block title %}Sales · StockDesk{% endblock %}
 {% block content %}
-<header>
-    <h1 class="sd-page-title">Sales</h1>
-    <p class="sd-page-sub">Billing screen arrives on Day 7. All three roles can view this page.</p>
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Sales</h1>
+        <p class="sd-page-sub mb-0">Billing with concurrency-safe stock-out and sequential invoice numbers.</p>
+    </div>
+    {% if perms.sales.add_sale %}
+    <a href="{% url 'sales:sale_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
+        <i class="bi bi-plus-lg"></i> New sale
+    </a>
+    {% endif %}
 </header>
-<section class="sd-panel">
-    <h2>Coming soon</h2>
-    <p class="text-muted mb-0">No sales rows yet — Day 3 only proves login + permission gates.</p>
-</section>
+
+<form method="get" class="sd-panel mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Invoice no, customer, or phone">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="sd-btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Lines</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr class="sd-row-link" data-href="{% url 'sales:sale_detail' sale.pk %}" tabindex="0" role="link" aria-label="Open invoice {{ sale.invoice_no }}">
+                    <td>{{ sale.invoice_no }}</td>
+                    <td>{{ sale.sale_date|date:"d M Y H:i" }}</td>
+                    <td>{% if sale.customer %}{{ sale.customer.name }}{% else %}<span class="text-muted">Walk-in</span>{% endif %}</td>
+                    <td>{{ sale.line_count }}</td>
+                    <td>₹{{ sale.total_amount }}</td>
+                    <td>{{ sale.get_payment_status_display }}</td>
+                    <td>{{ sale.created_by|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-muted p-4">No sales yet. <a href="{% url 'sales:sale_create' %}">Create the first invoice</a>.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">Prev</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}

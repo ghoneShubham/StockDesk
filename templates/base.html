@@ -70,6 +70,26 @@
 {% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  function go(href) {
+    if (href) window.location.href = href;
+  }
+  document.addEventListener("click", function (e) {
+    const ignore = e.target.closest("a, button, input, select, textarea, label, form, .sd-row-actions");
+    const row = e.target.closest("tr.sd-row-link[data-href]");
+    if (!row || ignore) return;
+    go(row.dataset.href);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const row = e.target.closest("tr.sd-row-link[data-href]");
+    if (!row || e.target !== row) return;
+    e.preventDefault();
+    go(row.dataset.href);
+  });
+})();
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

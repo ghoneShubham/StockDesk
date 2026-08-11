@@ -22,3 +22,24 @@ project (Section 14 deliverable).
 | `ALTER USER stockdesk CREATEDB;` | pytest-django needs to create/drop its own `test_stockdesk_dev` database on each run; the app's least-privilege role didn't have that by default |
 | `python manage.py bootstrap_roles` | Create/update Owner, Store Manager, Cashier Django Groups with the PRD Section 3 permission matrix |
 | `python manage.py create_role_users` | Create one demo user per role and assign them to the matching Group |
+
+## Day 5 — Demo dataset
+
+| Command | Why |
+|---|---|
+| `python manage.py seed_demo_data --flush` | Build the PRD §7.1 scale dataset (30 suppliers / 500 products / 200 customers / 800 purchases / 3,000 sales ≈ 50k lines + stock movements). `--flush` clears prior business rows first |
+
+## Day 7 — Sales concurrency
+
+| Command | Why |
+|---|---|
+| `python scripts/concurrency_proof.py` | Fire two concurrent sales against the last unit of a product; proves one success + one clean `InsufficientStockError` (PRD R2) |
+| `pytest apps/sales/tests.py -q` | Day 7 sales suite: stock-out, atomic rollback, concurrent last-unit, unique invoice numbers |
+
+## Day 8 — Invoice PDF + storage
+
+| Command | Why |
+|---|---|
+| `pip install xhtml2pdf==0.2.16` | Day 8 requirement change: WeasyPrint needs GTK/Pango on Windows and fails to import; xhtml2pdf is the PRD-allowed portable engine |
+| `python manage.py makemigrations sales` | Add `Sale.pdf` FileField for stored invoice PDFs (local media in dev, S3 via django-storages in prod) |
+| `pytest apps/sales/tests.py -q` | Includes PDF generate/store + download permission checks |

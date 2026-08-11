@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # Third-party
     "widget_tweaks",
+    "storages",
     # StockDesk apps
     "apps.core",
     "apps.accounts",
@@ -118,12 +119,30 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Default file storage: local MEDIA_ROOT in base/dev. Production overrides
+# STORAGES["default"] to S3 (django-storages) for product images + invoice PDFs.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ---------------------------------------------------------------------------
 # StockDesk-specific settings
 # ---------------------------------------------------------------------------
 COMPANY_NAME = config("COMPANY_NAME", default="StockDesk")
+COMPANY_ADDRESS = config("COMPANY_ADDRESS", default="")
+COMPANY_PHONE = config("COMPANY_PHONE", default="")
+COMPANY_GSTIN = config("COMPANY_GSTIN", default="")
+
+# Day 8 requirement change: default to xhtml2pdf (works on Windows without GTK).
+# Use "weasyprint" on Linux servers when Pango/GTK libs are installed.
+INVOICE_PDF_ENGINE = config("INVOICE_PDF_ENGINE", default="xhtml2pdf")
 
 RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID", default="")
 RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET", default="")

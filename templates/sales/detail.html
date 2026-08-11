@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ sale.invoice_no }} · StockDesk{% endblock %}
+{% block content %}
+{% url 'sales:sale_list' as sales_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=sales_url back_label="Sales" home_url=dashboard_url home_label="Dashboard" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">{{ sale.invoice_no }}</h1>
+        <p class="sd-page-sub mb-0">
+            {{ sale.sale_date|date:"d M Y H:i" }}
+            · {% if sale.customer %}{{ sale.customer.name }}{% else %}Walk-in{% endif %}
+            · {{ sale.get_payment_status_display }}
+        </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'sales:sale_pdf' sale.pk %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;" target="_blank" rel="noopener">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </a>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+        </button>
+    </div>
+</header>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <section class="sd-panel p-0 overflow-hidden" id="invoice-print">
+            <div class="p-3 border-bottom"><h2 class="h5 mb-0">Line items</h2></div>
+            <div class="table-responsive">
+                <table class="table sd-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Discount</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in sale.items.all %}
+                        <tr>
+                            <td>{{ item.product.sku }} — {{ item.product.name }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>₹{{ item.rate }}</td>
+                            <td>₹{{ item.discount }}</td>
+                            <td>₹{{ item.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-end">Subtotal</th>
+                            <th>₹{{ sale.subtotal }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Invoice discount</th>
+                            <th>₹{{ sale.discount }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Tax</th>
+                            <th>₹{{ sale.tax }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Total</th>
+                            <th>₹{{ sale.total_amount }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-4">
+        <section class="sd-panel">
+            <h2 class="h5">Meta</h2>
+            <dl class="row mb-0 small">
+                <dt class="col-5">Created by</dt>
+                <dd class="col-7">{{ sale.created_by|default:"—" }}</dd>
+                <dt class="col-5">Created at</dt>
+                <dd class="col-7">{{ sale.created_at|date:"d M Y H:i" }}</dd>
+                {% if sale.customer %}
+                <dt class="col-5">Phone</dt>
+                <dd class="col-7">{{ sale.customer.phone }}</dd>
+                {% endif %}
+                <dt class="col-5">PDF file</dt>
+                <dd class="col-7">{% if sale.pdf %}Stored{% else %}Not generated yet{% endif %}</dd>
+            </dl>
+        </section>
+        <section class="sd-panel">
+            <h2 class="h5">Stock movements</h2>
+            <ul class="list-unstyled mb-0 small">
+                {% for m in stock_movements %}
+                <li class="mb-2">
+                    <strong>{{ m.product.sku }}</strong>
+                    <span class="text-danger">{{ m.qty_delta }}</span>
+                </li>
+                {% empty %}
+                <li class="text-muted">No movements linked.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}

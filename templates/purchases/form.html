@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}New purchase · StockDesk{% endblock %}
+{% block content %}
+{% url 'purchases:purchase_list' as purchases_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=purchases_url back_label="Purchases" home_url=dashboard_url home_label="Dashboard" %}
+<header>
+    <h1 class="sd-page-title">New purchase</h1>
+    <p class="sd-page-sub">One supplier, many products. Saving increases stock atomically.</p>
+</header>
+
+<form method="post" novalidate id="purchase-form">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    <section class="sd-panel mb-3">
+        <h2 class="h5 mb-3">Header</h2>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label" for="{{ form.supplier.id_for_label }}">Supplier *</label>
+                {{ form.supplier }}
+                {% for e in form.supplier.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="{{ form.purchase_date.id_for_label }}">Purchase date *</label>
+                {{ form.purchase_date }}
+                {% for e in form.purchase_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="{{ form.supplier_invoice_no.id_for_label }}">Supplier invoice no.</label>
+                {{ form.supplier_invoice_no }}
+                {% for e in form.supplier_invoice_no.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+        </div>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger sd-alert mt-3">{{ form.non_field_errors }}</div>
+        {% endif %}
+    </section>
+
+    <section class="sd-panel p-0 overflow-hidden mb-3">
+        <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="h5 mb-0">Line items</h2>
+                <span class="text-muted small">Start with one product, then add more as needed</span>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="add-purchase-line">
+                <i class="bi bi-plus-lg"></i> Add product
+            </button>
+        </div>
+        {% if formset.non_form_errors %}
+        <div class="alert alert-danger sd-alert m-3 mb-0">
+            {% for e in formset.non_form_errors %}{{ e }}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table sd-table mb-0" id="purchase-lines">
+                <thead>
+                    <tr>
+                        <th style="min-width:240px;">Product</th>
+                        <th style="width:120px;">Qty</th>
+                        <th style="width:140px;">Rate (₹)</th>
+                        <th style="width:140px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in formset %}
+                    <tr class="purchase-line">
+                        <td>
+                            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                            {{ f.id }}
+                            {{ f.product }}
+                            {% for e in f.product.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td>
+                            {{ f.qty }}
+                            {% for e in f.qty.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td>
+                            {{ f.rate }}
+                            {% for e in f.rate.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Computed total</th>
+                        <th><span id="purchase-total" class="fw-bold">₹0.00</span></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.7rem 1.4rem;">Save purchase</button>
+        <a href="{% url 'purchases:purchase_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+<template id="purchase-line-template">
+    <tr class="purchase-line">
+        <td>
+            {% with f=formset.empty_form %}
+            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+            {{ f.id }}
+            {{ f.product }}
+            {% endwith %}
+        </td>
+        <td>{{ formset.empty_form.qty }}</td>
+        <td>{{ formset.empty_form.rate }}</td>
+        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+{{ product_prices|json_script:"product-prices-data" }}
+<script>
+(function () {
+  const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
+  const tbody = document.querySelector("#purchase-lines tbody");
+  const totalForms = document.getElementById("id_items-TOTAL_FORMS");
+  const template = document.getElementById("purchase-line-template");
+  const addBtn = document.getElementById("add-purchase-line");
+
+  function money(n) {
+    return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+  }
+
+  function recalc() {
+    let total = 0;
+    document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach((row) => {
+      const qtyEl = row.querySelector(".purchase-qty");
+      const rateEl = row.querySelector(".purchase-rate");
+      const amtEl = row.querySelector(".line-amount");
+      const qty = parseFloat(qtyEl && qtyEl.value) || 0;
+      const rate = parseFloat(rateEl && rateEl.value) || 0;
+      const amt = qty * rate;
+      if (amtEl) amtEl.textContent = "₹" + money(amt);
+      total += amt;
+    });
+    const totalEl = document.getElementById("purchase-total");
+    if (totalEl) totalEl.textContent = "₹" + money(total);
+  }
+
+  function bindRow(row) {
+    const productEl = row.querySelector(".purchase-product");
+    const rateEl = row.querySelector(".purchase-rate");
+    if (productEl) {
+      productEl.addEventListener("change", () => {
+        const price = prices[productEl.value];
+        if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
+          rateEl.value = price;
+          rateEl.dataset.autofilled = "1";
+        }
+        recalc();
+      });
+    }
+    if (rateEl) {
+      rateEl.addEventListener("input", () => {
+        rateEl.dataset.autofilled = "0";
+        recalc();
+      });
+    }
+    row.querySelectorAll(".purchase-qty, .purchase-rate").forEach((el) => {
+      el.addEventListener("input", recalc);
+    });
+  }
+
+  function addRow() {
+    const index = parseInt(totalForms.value, 10);
+    const html = template.innerHTML.replace(/__prefix__/g, String(index));
+    const wrap = document.createElement("tbody");
+    wrap.innerHTML = html.trim();
+    const row = wrap.firstElementChild;
+    tbody.appendChild(row);
+    totalForms.value = String(index + 1);
+    bindRow(row);
+    const productEl = row.querySelector(".purchase-product");
+    if (productEl) productEl.focus();
+    recalc();
+  }
+
+  document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach(bindRow);
+  if (addBtn) addBtn.addEventListener("click", addRow);
+  recalc();
+})();
+</script>
+{% endblock %}

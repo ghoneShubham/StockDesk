@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}New sale · StockDesk{% endblock %}
+{% block content %}
+{% url 'sales:sale_list' as sales_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=sales_url back_label="Sales" home_url=dashboard_url home_label="Dashboard" %}
+<header>
+    <h1 class="sd-page-title">New sale</h1>
+    <p class="sd-page-sub">Keyboard-friendly billing. Saving decreases stock atomically and allocates the next invoice number.</p>
+</header>
+
+<form method="post" novalidate id="sale-form">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    <section class="sd-panel mb-3">
+        <h2 class="h5 mb-3">Header</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="{{ form.customer.id_for_label }}">Customer</label>
+                {{ form.customer }}
+                {% for e in form.customer.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="{{ form.sale_date.id_for_label }}">Sale date *</label>
+                {{ form.sale_date }}
+                {% for e in form.sale_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="{{ form.discount.id_for_label }}">Invoice discount</label>
+                {{ form.discount }}
+                {% for e in form.discount.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-1">
+                <label class="form-label" for="{{ form.tax.id_for_label }}">Tax</label>
+                {{ form.tax }}
+                {% for e in form.tax.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="{{ form.payment_status.id_for_label }}">Payment</label>
+                {{ form.payment_status }}
+                {% for e in form.payment_status.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+        </div>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger sd-alert mt-3">{{ form.non_field_errors }}</div>
+        {% endif %}
+    </section>
+
+    <section class="sd-panel p-0 overflow-hidden mb-3">
+        <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="h5 mb-0">Line items</h2>
+                <span class="text-muted small">Start with one product, then add more as needed</span>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="add-sale-line">
+                <i class="bi bi-plus-lg"></i> Add product
+            </button>
+        </div>
+        {% if formset.non_form_errors %}
+        <div class="alert alert-danger sd-alert m-3 mb-0">
+            {% for e in formset.non_form_errors %}{{ e }}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table sd-table mb-0" id="sale-lines">
+                <thead>
+                    <tr>
+                        <th style="min-width:240px;">Product</th>
+                        <th style="width:110px;">Qty</th>
+                        <th style="width:130px;">Rate (₹)</th>
+                        <th style="width:130px;">Discount</th>
+                        <th style="width:130px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in formset %}
+                    <tr class="sale-line">
+                        <td>
+                            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                            {{ f.id }}
+                            {{ f.product }}
+                            {% for e in f.product.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td>
+                            {{ f.qty }}
+                            {% for e in f.qty.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td>
+                            {{ f.rate }}
+                            {% for e in f.rate.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td>
+                            {{ f.discount }}
+                            {% for e in f.discount.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </td>
+                        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-end">Subtotal</th>
+                        <th><span id="sale-subtotal" class="fw-bold">₹0.00</span></th>
+                    </tr>
+                    <tr>
+                        <th colspan="4" class="text-end">Total (after discount + tax)</th>
+                        <th><span id="sale-total" class="fw-bold">₹0.00</span></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.7rem 1.4rem;">Save sale</button>
+        <a href="{% url 'sales:sale_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+<template id="sale-line-template">
+    <tr class="sale-line">
+        <td>
+            {% with f=formset.empty_form %}
+            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+            {{ f.id }}
+            {{ f.product }}
+            {% endwith %}
+        </td>
+        <td>{{ formset.empty_form.qty }}</td>
+        <td>{{ formset.empty_form.rate }}</td>
+        <td>{{ formset.empty_form.discount }}</td>
+        <td class="align-middle"><span class="line-amount fw-semibold">₹0.00</span></td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+{{ product_prices|json_script:"product-prices-data" }}
+<script>
+(function () {
+  const prices = JSON.parse(document.getElementById("product-prices-data").textContent);
+  const tbody = document.querySelector("#sale-lines tbody");
+  const totalForms = document.getElementById("id_items-TOTAL_FORMS");
+  const template = document.getElementById("sale-line-template");
+  const addBtn = document.getElementById("add-sale-line");
+
+  function money(n) {
+    return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+  }
+
+  function recalc() {
+    let subtotal = 0;
+    document.querySelectorAll("#sale-lines tbody tr.sale-line").forEach((row) => {
+      const qtyEl = row.querySelector(".sale-qty");
+      const rateEl = row.querySelector(".sale-rate");
+      const discEl = row.querySelector(".sale-discount");
+      const amtEl = row.querySelector(".line-amount");
+      const qty = parseFloat(qtyEl && qtyEl.value) || 0;
+      const rate = parseFloat(rateEl && rateEl.value) || 0;
+      const discount = parseFloat(discEl && discEl.value) || 0;
+      const amt = Math.max(0, qty * rate - discount);
+      if (amtEl) amtEl.textContent = "₹" + money(amt);
+      subtotal += amt;
+    });
+    const headerDisc = parseFloat(document.getElementById("id_header_discount")?.value) || 0;
+    const tax = parseFloat(document.getElementById("id_tax")?.value) || 0;
+    const total = Math.max(0, subtotal - headerDisc + tax);
+    const subEl = document.getElementById("sale-subtotal");
+    const totEl = document.getElementById("sale-total");
+    if (subEl) subEl.textContent = "₹" + money(subtotal);
+    if (totEl) totEl.textContent = "₹" + money(total);
+  }
+
+  function bindRow(row) {
+    const productEl = row.querySelector(".sale-product");
+    const rateEl = row.querySelector(".sale-rate");
+    if (productEl) {
+      productEl.addEventListener("change", () => {
+        const price = prices[productEl.value];
+        if (price != null && rateEl && (!rateEl.value || rateEl.dataset.autofilled === "1")) {
+          rateEl.value = price;
+          rateEl.dataset.autofilled = "1";
+        }
+        recalc();
+      });
+    }
+    if (rateEl) {
+      rateEl.addEventListener("input", () => {
+        rateEl.dataset.autofilled = "0";
+        recalc();
+      });
+    }
+    row.querySelectorAll(".sale-qty, .sale-rate, .sale-discount").forEach((el) => {
+      el.addEventListener("input", recalc);
+    });
+  }
+
+  function addRow() {
+    const index = parseInt(totalForms.value, 10);
+    const html = template.innerHTML.replace(/__prefix__/g, String(index));
+    const wrap = document.createElement("tbody");
+    wrap.innerHTML = html.trim();
+    const row = wrap.firstElementChild;
+    tbody.appendChild(row);
+    totalForms.value = String(index + 1);
+    bindRow(row);
+    const productEl = row.querySelector(".sale-product");
+    if (productEl) productEl.focus();
+    recalc();
+  }
+
+  document.querySelectorAll("#sale-lines tbody tr.sale-line").forEach(bindRow);
+  if (addBtn) addBtn.addEventListener("click", addRow);
+
+  ["id_header_discount", "id_tax"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", recalc);
+  });
+
+  recalc();
+})();
+</script>
+{% endblock %}

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Reports · StockDesk{% endblock %}
 {% block content %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">Operational reports</h1>
     <p class="sd-page-sub">Stock and low-stock reports will land here on Days 11–12. Access is already gated to Owner and Store Manager.</p>
