@@ -1,13 +1,14 @@
 import logging
 
 from django.contrib import messages
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Prefetch, Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
 from apps.core.mixins import PermissionRequiredMixin
+from apps.core.query import annotate_line_count
 from apps.inventory.models import StockMovement
 from apps.masters.models import Product
 
@@ -27,11 +28,11 @@ class SaleListView(PermissionRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = (
-            Sale.objects.select_related("customer", "created_by")
-            .annotate(line_count=Count("items"))
-            .order_by("-sale_date", "-id")
-        )
+        qs = annotate_line_count(
+            Sale.objects.select_related("customer", "created_by"),
+            related_model=SaleItem,
+            fk_field="sale_id",
+        ).order_by("-sale_date", "-id")
         q = self.request.GET.get("q", "").strip()
         if q:
             filters = (
@@ -105,12 +106,20 @@ class SaleCreateView(PermissionRequiredMixin, View):
     permission_required = "sales.add_sale"
     template_name = "sales/form.html"
 
+    def _product_queryset(self):
+        return Product.objects.filter(is_active=True, sellable=True).only(
+            "id", "sku", "name", "sale_price"
+        ).order_by("name")
+
     def get(self, request):
-        return self._render(request, SaleForm(), SaleItemFormSet(instance=Sale()))
+        products = self._product_queryset()
+        formset = SaleItemFormSet(instance=Sale(), form_kwargs={"products_qs": products})
+        return self._render(request, SaleForm(), formset, products)
 
     def post(self, request):
+        products = self._product_queryset()
         form = SaleForm(request.POST)
-        formset = SaleItemFormSet(request.POST, instance=Sale())
+        formset = SaleItemFormSet(request.POST, instance=Sale(), form_kwargs={"products_qs": products})
         if form.is_valid() and formset.is_valid():
             lines = lines_from_formset(formset)
             try:
@@ -125,7 +134,7 @@ class SaleCreateView(PermissionRequiredMixin, View):
                 )
             except (InsufficientStockError, SaleValidationError, ValueError) as exc:
                 messages.error(request, str(exc))
-                return self._render(request, form, formset)
+                return self._render(request, form, formset, products)
 
             try:
                 ensure_invoice_pdf(sale)
@@ -139,18 +148,17 @@ class SaleCreateView(PermissionRequiredMixin, View):
             else:
                 messages.success(
                     request,
-                    f"Invoice {sale.invoice_no} saved — stock reduced for {sale.items.count()} line(s).",
+                    f"Invoice {sale.invoice_no} saved - stock reduced for {len(lines)} line(s).",
                 )
             return redirect(reverse("sales:sale_detail", kwargs={"pk": sale.pk}))
 
         messages.error(request, "Please fix the errors below.")
-        return self._render(request, form, formset)
+        return self._render(request, form, formset, products)
 
-    def _render(self, request, form, formset):
-        price_map = {
-            str(p.id): str(p.sale_price)
-            for p in Product.objects.filter(is_active=True, sellable=True).only("id", "sale_price")
-        }
+    def _render(self, request, form, formset, products=None):
+        if products is None:
+            products = self._product_queryset()
+        price_map = {str(p.id): str(p.sale_price) for p in products}
         return render(
             request,
             self.template_name,

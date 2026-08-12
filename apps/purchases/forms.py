@@ -39,11 +39,11 @@ class PurchaseItemForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, products_qs=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product"].queryset = (
-            Product.objects.filter(is_active=True).select_related("category").order_by("sku")
-        )
+        if products_qs is None:
+            products_qs = Product.objects.filter(is_active=True).order_by("sku")
+        self.fields["product"].queryset = products_qs
         self.fields["product"].label_from_instance = (
             lambda obj: f"{obj.sku} — {obj.name}"
         )

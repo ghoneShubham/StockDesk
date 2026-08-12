@@ -1,10 +1,11 @@
 from django.contrib import messages
-from django.db.models import Count, Prefetch
+from django.db.models import Prefetch, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
 from apps.core.mixins import PermissionRequiredMixin
+from apps.core.query import annotate_line_count
 from apps.inventory.models import StockMovement
 from apps.masters.models import Product
 
@@ -21,13 +22,11 @@ class PurchaseListView(PermissionRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        from django.db.models import Q
-
-        qs = (
-            Purchase.objects.select_related("supplier", "created_by")
-            .annotate(line_count=Count("items"))
-            .order_by("-purchase_date", "-id")
-        )
+        qs = annotate_line_count(
+            Purchase.objects.select_related("supplier", "created_by"),
+            related_model=PurchaseItem,
+            fk_field="purchase_id",
+        ).order_by("-purchase_date", "-id")
         q = self.request.GET.get("q", "").strip()
         if q:
             filters = Q(supplier__name__icontains=q) | Q(supplier_invoice_no__icontains=q)
@@ -65,12 +64,24 @@ class PurchaseCreateView(PermissionRequiredMixin, View):
     permission_required = "purchases.add_purchase"
     template_name = "purchases/form.html"
 
+    def _product_queryset(self):
+        return Product.objects.filter(is_active=True).only(
+            "id", "sku", "name", "purchase_price"
+        ).order_by("sku")
+
     def get(self, request):
-        return self._render(request, PurchaseForm(), PurchaseItemFormSet(instance=Purchase()))
+        products = self._product_queryset()
+        formset = PurchaseItemFormSet(
+            instance=Purchase(), form_kwargs={"products_qs": products}
+        )
+        return self._render(request, PurchaseForm(), formset, products)
 
     def post(self, request):
+        products = self._product_queryset()
         form = PurchaseForm(request.POST)
-        formset = PurchaseItemFormSet(request.POST, instance=Purchase())
+        formset = PurchaseItemFormSet(
+            request.POST, instance=Purchase(), form_kwargs={"products_qs": products}
+        )
         if form.is_valid() and formset.is_valid():
             lines = lines_from_formset(formset)
             try:
@@ -83,22 +94,21 @@ class PurchaseCreateView(PermissionRequiredMixin, View):
                 )
             except ValueError as exc:
                 messages.error(request, str(exc))
-                return self._render(request, form, formset)
+                return self._render(request, form, formset, products)
 
             messages.success(
                 request,
-                f"Purchase #{purchase.pk} saved — stock increased for {purchase.items.count()} line(s).",
+                f"Purchase #{purchase.pk} saved - stock increased for {len(lines)} line(s).",
             )
             return redirect(reverse("purchases:purchase_detail", kwargs={"pk": purchase.pk}))
 
         messages.error(request, "Please fix the errors below.")
-        return self._render(request, form, formset)
+        return self._render(request, form, formset, products)
 
-    def _render(self, request, form, formset):
-        price_map = {
-            str(p.id): str(p.purchase_price)
-            for p in Product.objects.filter(is_active=True).only("id", "purchase_price")
-        }
+    def _render(self, request, form, formset, products=None):
+        if products is None:
+            products = self._product_queryset()
+        price_map = {str(p.id): str(p.purchase_price) for p in products}
         return render(
             request,
             self.template_name,

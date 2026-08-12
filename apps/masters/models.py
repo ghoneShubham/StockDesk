@@ -61,6 +61,8 @@ class Product(TimeStampedModel):
         ]
         indexes = [
             models.Index(fields=["is_active", "sellable"]),
+            models.Index(fields=["is_active", "name"]),
+            models.Index(fields=["sku"]),
         ]
         permissions = [
             ("view_purchase_price", "Can view product purchase price"),
@@ -80,6 +82,9 @@ class Supplier(TimeStampedModel):
 
     class Meta:
         ordering = ["name"]
+        indexes = [
+            models.Index(fields=["is_active", "name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -92,6 +97,9 @@ class Customer(TimeStampedModel):
 
     class Meta:
         ordering = ["name"]
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.phone})"

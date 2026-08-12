@@ -75,13 +75,11 @@ class SaleItemForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, products_qs=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product"].queryset = (
-            Product.objects.filter(is_active=True, sellable=True)
-            .select_related("category")
-            .order_by("name")
-        )
+        if products_qs is None:
+            products_qs = Product.objects.filter(is_active=True, sellable=True).order_by("name")
+        self.fields["product"].queryset = products_qs
         self.fields["product"].required = False
         self.fields["qty"].required = False
         self.fields["rate"].required = False

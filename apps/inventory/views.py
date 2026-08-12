@@ -1,7 +1,8 @@
 from decimal import Decimal
 
 from django.contrib import messages
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
@@ -11,7 +12,7 @@ from apps.masters.models import Product
 
 from .forms import AdjustmentForm
 from .models import Adjustment, StockMovement
-from .services import AdjustmentError, apply_adjustment
+from .services import AdjustmentError, apply_adjustment, current_stock
 
 
 class AdjustmentListView(PermissionRequiredMixin, ListView):
@@ -85,8 +86,8 @@ class AdjustmentCreateView(PermissionRequiredMixin, View):
 
 class ProductStockHistoryView(PermissionRequiredMixin, DetailView):
     """
-    Per-product stock ledger: every movement with running balance.
-    Answers PRD R1 — 'stock shows 37, what happened?'
+    Per-product stock ledger with running balance (PRD R1).
+    Paginated newest-first; balance reconstructed without loading the full ledger.
     """
 
     model = Product
@@ -94,25 +95,46 @@ class ProductStockHistoryView(PermissionRequiredMixin, DetailView):
     template_name = "inventory/stock_history.html"
     context_object_name = "product"
     pk_url_kwarg = "pk"
+    paginate_by = 50
 
     def get_queryset(self):
         return Product.objects.select_related("category")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        movements = list(
+        movements_qs = (
             StockMovement.objects.filter(product=self.object)
             .select_related("created_by")
-            .order_by("created_at", "id")
+            .order_by("-created_at", "-id")
         )
-        running = Decimal("0.00")
+        paginator = Paginator(movements_qs, self.paginate_by)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+
+        stock_now = current_stock(self.object.pk)
+        # Balance after the newest movement on this page =
+        # current stock minus sum of movements newer than the page start.
+        if page_obj.object_list:
+            first = page_obj.object_list[0]
+            newer_sum = (
+                StockMovement.objects.filter(product=self.object)
+                .filter(
+                    Q(created_at__gt=first.created_at)
+                    | Q(created_at=first.created_at, id__gt=first.id)
+                )
+                .aggregate(s=Sum("qty_delta"))["s"]
+                or Decimal("0.00")
+            )
+            running = stock_now - newer_sum
+        else:
+            running = stock_now
+
         rows = []
-        for m in movements:
-            running += m.qty_delta
+        for m in page_obj.object_list:
             rows.append({"movement": m, "balance": running})
-        # Newest first for the table display.
-        rows.reverse()
+            running -= m.qty_delta
+
         ctx["history_rows"] = rows
-        ctx["current_stock"] = running
+        ctx["page_obj"] = page_obj
+        ctx["current_stock"] = stock_now
         ctx["can_adjust"] = self.request.user.has_perm("inventory.add_adjustment")
         return ctx

@@ -20,6 +20,8 @@ class Purchase(models.Model):
         ordering = ["-purchase_date", "-id"]
         indexes = [
             models.Index(fields=["-purchase_date"]),
+            models.Index(fields=["-purchase_date", "-id"]),
+            models.Index(fields=["supplier_invoice_no"]),
         ]
         constraints = [
             models.CheckConstraint(condition=models.Q(total_amount__gte=Decimal("0")), name="purchase_total_gte_0"),

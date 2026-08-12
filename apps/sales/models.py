@@ -55,7 +55,9 @@ class Sale(models.Model):
         ordering = ["-sale_date", "-id"]
         indexes = [
             models.Index(fields=["-sale_date"]),
+            models.Index(fields=["-sale_date", "-id"]),
             models.Index(fields=["payment_status"]),
+            models.Index(fields=["invoice_no"]),
         ]
         constraints = [
             models.CheckConstraint(condition=models.Q(subtotal__gte=Decimal("0")), name="sale_subtotal_gte_0"),

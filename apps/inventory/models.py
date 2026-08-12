@@ -43,6 +43,7 @@ class StockMovement(models.Model):
         ]
         indexes = [
             models.Index(fields=["product", "-created_at"]),
+            models.Index(fields=["product", "created_at", "id"]),
             models.Index(fields=["reference_type", "reference_id"]),
         ]
 
@@ -78,6 +79,10 @@ class Adjustment(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at", "-id"]),
+            models.Index(fields=["product", "-created_at"]),
+        ]
         constraints = [
             models.CheckConstraint(condition=~models.Q(qty_delta=0), name="adjustment_qty_delta_nonzero"),
         ]

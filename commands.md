@@ -51,3 +51,11 @@ project (Section 14 deliverable).
 | `python manage.py reconcile_stock` | Verify purchases/sales/adjustments match StockMovement rows; report orphans and negative stock (PRD R1) |
 | `python manage.py reconcile_stock --fail-on-drift` | Same check, non-zero exit if any drift — useful for cron later |
 | `pytest apps/inventory/tests.py -q` | Day 9 suite: adjustments, stock history permissions, reconcile command |
+
+## Day 10 — Performance
+
+| Command | Why |
+|---|---|
+| `python manage.py makemigrations … --name day10_perf_indexes` | Add composite indexes for list order / history / search |
+| `python manage.py profile_hot_queries` | `EXPLAIN (ANALYZE, BUFFERS)` on product stock annotate, sales list (Subquery vs JOIN Count), stock history |
+| `pytest apps/core/tests_performance.py -q` | Guard sales/product list query budgets (≤ 15) |

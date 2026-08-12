@@ -1,28 +1,17 @@
 from decimal import Decimal
 
 from django.contrib import messages
-from django.db.models import DecimalField, ProtectedError, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import ProtectedError, Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView, View
 
 from apps.core.mixins import PermissionRequiredMixin
+from apps.core.query import annotate_stock_qty
 from apps.inventory.models import StockMovement
 
 from .forms import CategoryForm, CustomerForm, ProductForm, SupplierForm
 from .models import Category, Customer, Product, Supplier
-
-
-def annotate_stock_qty(queryset):
-    """Current stock = sum of StockMovement.qty_delta (PRD R1)."""
-    return queryset.annotate(
-        stock_qty=Coalesce(
-            Sum("stock_movements__qty_delta"),
-            Value(Decimal("0.00")),
-            output_field=DecimalField(max_digits=14, decimal_places=2),
-        )
-    )
 
 
 class MastersIndexView(PermissionRequiredMixin, TemplateView):
