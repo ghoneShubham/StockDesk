@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · StockDesk{% endblock %}
 {% block content %}
-<header class="mb-1">
+<header class="sd-page-header">
     <h1 class="sd-page-title">Good day, {{ user.get_username }}</h1>
-    <p class="sd-page-sub">Live pulse for sales, stock, and collections.</p>
+    <p class="sd-page-sub">Your live pulse for sales, stock, and collections — numbers you can trust.</p>
 </header>
 
 <div class="row g-4">
@@ -12,7 +12,7 @@
             <div class="sd-metric__icon"><i class="bi bi-receipt"></i></div>
             <div class="sd-metric__label">Today's Sales</div>
             <div class="sd-metric__value">₹{{ today_total }}</div>
-            <div class="small opacity-75 mt-1">{{ today_count }} invoice{{ today_count|pluralize }}</div>
+            <div class="sd-metric__meta">{{ today_count }} invoice{{ today_count|pluralize }}</div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -20,7 +20,7 @@
             <div class="sd-metric__icon"><i class="bi bi-graph-up-arrow"></i></div>
             <div class="sd-metric__label">This Month</div>
             <div class="sd-metric__value">₹{{ month_total }}</div>
-            <div class="small opacity-75 mt-1">{{ month_count }} invoice{{ month_count|pluralize }} · since {{ month_start|date:"d M" }}</div>
+            <div class="sd-metric__meta">{{ month_count }} invoice{{ month_count|pluralize }} · since {{ month_start|date:"d M" }}</div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -29,10 +29,10 @@
             <div class="sd-metric__label">Low Stock</div>
             {% if can_see_low_stock %}
             <div class="sd-metric__value">{{ low_stock_count }}</div>
-            <div class="small opacity-75 mt-1"><a class="link-light" href="{% url 'reports:low_stock' %}">View report</a></div>
+            <div class="sd-metric__meta"><a href="{% url 'reports:low_stock' %}">View report →</a></div>
             {% else %}
             <div class="sd-metric__value">&mdash;</div>
-            <div class="small opacity-75 mt-1">Manager / Owner only</div>
+            <div class="sd-metric__meta">Manager / Owner only</div>
             {% endif %}
         </div>
     </div>
@@ -41,7 +41,7 @@
             <div class="sd-metric__icon"><i class="bi bi-wallet2"></i></div>
             <div class="sd-metric__label">Pending Payments</div>
             <div class="sd-metric__value">₹{{ pending_payment_total }}</div>
-            <div class="small opacity-75 mt-1">Pending + partial invoices</div>
+            <div class="sd-metric__meta">Pending + partial invoices</div>
         </div>
     </div>
 </div>
@@ -57,10 +57,12 @@
             <tbody>
                 {% for p in top_products %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ p.product__sku }} — {{ p.product__name }}</td>
+                    <td>
+                        <span class="sd-rank {% if forloop.counter <= 3 %}sd-rank--{{ forloop.counter }}{% endif %}">{{ forloop.counter }}</span>
+                    </td>
+                    <td><strong>{{ p.product__sku }}</strong> — {{ p.product__name }}</td>
                     <td>{{ p.qty_sold }}</td>
-                    <td>₹{{ p.revenue }}</td>
+                    <td><strong>₹{{ p.revenue }}</strong></td>
                 </tr>
                 {% endfor %}
             </tbody>

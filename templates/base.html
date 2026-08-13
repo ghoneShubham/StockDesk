@@ -26,21 +26,21 @@
         </button>
         <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
-                <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'core' %}sd-nav-active{% endif %}" href="{% url 'core:dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
                 {% if perms.masters.view_product %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'masters:index' %}"><i class="bi bi-boxes me-1"></i>Masters</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'masters' %}sd-nav-active{% endif %}" href="{% url 'masters:index' %}"><i class="bi bi-boxes me-1"></i>Masters</a></li>
                 {% endif %}
                 {% if perms.sales.view_sale %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'sales:sale_list' %}"><i class="bi bi-receipt me-1"></i>Sales</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'sales' %}sd-nav-active{% endif %}" href="{% url 'sales:sale_list' %}"><i class="bi bi-receipt me-1"></i>Sales</a></li>
                 {% endif %}
                 {% if perms.purchases.view_purchase %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'purchases:purchase_list' %}"><i class="bi bi-truck me-1"></i>Purchases</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'purchases' %}sd-nav-active{% endif %}" href="{% url 'purchases:purchase_list' %}"><i class="bi bi-truck me-1"></i>Purchases</a></li>
                 {% endif %}
                 {% if perms.inventory.view_adjustment %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'inventory:adjustment_list' %}"><i class="bi bi-sliders me-1"></i>Inventory</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'inventory' %}sd-nav-active{% endif %}" href="{% url 'inventory:adjustment_list' %}"><i class="bi bi-sliders me-1"></i>Inventory</a></li>
                 {% endif %}
                 {% if perms.reports.view_operational_reports %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'reports:index' %}"><i class="bi bi-bar-chart me-1"></i>Reports</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'reports' %}sd-nav-active{% endif %}" href="{% url 'reports:index' %}"><i class="bi bi-bar-chart me-1"></i>Reports</a></li>
                 {% endif %}
                 {% block nav_links %}{% endblock %}
             </ul>

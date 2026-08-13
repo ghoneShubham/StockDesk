@@ -3,14 +3,14 @@
 {% block content %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
-<header class="mb-3">
+<header class="sd-page-header">
     <h1 class="sd-page-title">Reports</h1>
-    <p class="sd-page-sub mb-0">Set 1 operational reports with date filters and CSV export. Owner and Store Manager only.</p>
+    <p class="sd-page-sub">Set 1 operational reports with date filters and CSV export. Owner and Store Manager only.</p>
 </header>
 
 <section class="sd-panel">
     <h2>Operational</h2>
-    <div class="list-group list-group-flush">
+    <div class="list-group list-group-flush sd-report-list">
         {% for r in operational_reports %}
         <a href="{% url r.url_name %}" class="list-group-item list-group-item-action px-0">
             <div class="d-flex justify-content-between align-items-center gap-2">
@@ -18,7 +18,7 @@
                     <strong>{{ r.name }}</strong>
                     <div class="small text-muted">{{ r.desc }}</div>
                 </div>
-                <i class="bi bi-chevron-right text-muted"></i>
+                <i class="bi bi-arrow-right-circle text-muted"></i>
             </div>
         </a>
         {% endfor %}

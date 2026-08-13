@@ -5,7 +5,9 @@
 {% block content %}
 <div class="sd-login-shell">
     <section class="sd-login-hero" aria-label="StockDesk brand">
-        <p class="mb-2 fw-semibold text-uppercase" style="letter-spacing: 0.12em; font-size: 0.8rem; opacity: 0.85;">Inventory &amp; Billing</p>
+        <span class="sd-login-orb sd-login-orb--a" aria-hidden="true"></span>
+        <span class="sd-login-orb sd-login-orb--b" aria-hidden="true"></span>
+        <p class="sd-login-kicker">Inventory &amp; Billing</p>
         <h1 class="sd-login-brand">StockDesk</h1>
         <p class="sd-login-tagline">Track stock, bill faster, and keep every number explainable — from one desk.</p>
     </section>
@@ -27,7 +29,7 @@
                     {{ form.username|add_class:"form-control"|attr:"placeholder:Enter username"|attr:"autocomplete:username" }}
                 </div>
                 <div class="mb-4">
-                    <label class="form-label" for="id_password ">Password</label>
+                    <label class="form-label" for="id_password">Password</label>
                     {{ form.password|add_class:"form-control"|attr:"placeholder:Enter password"|attr:"autocomplete:current-password" }}
                 </div>
                 <button type="submit" class="sd-btn-primary">Log in</button>

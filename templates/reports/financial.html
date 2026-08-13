@@ -4,12 +4,12 @@
 {% url 'reports:index' as reports_url %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
-<header class="mb-3">
+<header class="sd-page-header">
     <h1 class="sd-page-title">Financial reports</h1>
-    <p class="sd-page-sub mb-0">Margin and stock valuation — Owner only. Cashier / Manager get HTTP 403.</p>
+    <p class="sd-page-sub">Margin and stock valuation — Owner only. Cashier / Manager get HTTP 403.</p>
 </header>
 <section class="sd-panel">
-    <div class="list-group list-group-flush">
+    <div class="list-group list-group-flush sd-report-list">
         {% for r in financial_reports %}
         <a href="{% url r.url_name %}" class="list-group-item list-group-item-action px-0">
             <div class="d-flex justify-content-between align-items-center gap-2">
@@ -17,7 +17,7 @@
                     <strong>{{ r.name }}</strong>
                     <div class="small text-muted">{{ r.desc }}</div>
                 </div>
-                <i class="bi bi-chevron-right text-muted"></i>
+                <i class="bi bi-arrow-right-circle text-muted"></i>
             </div>
         </a>
         {% endfor %}

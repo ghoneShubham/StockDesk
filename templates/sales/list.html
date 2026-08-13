@@ -3,10 +3,10 @@
 {% block content %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
-<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+<header class="sd-page-header d-flex flex-wrap justify-content-between align-items-start gap-2">
     <div>
         <h1 class="sd-page-title">Sales</h1>
-        <p class="sd-page-sub mb-0">Billing with concurrency-safe stock-out and sequential invoice numbers.</p>
+        <p class="sd-page-sub">Billing with concurrency-safe stock-out and sequential invoice numbers.</p>
     </div>
     {% if perms.sales.add_sale %}
     <a href="{% url 'sales:sale_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">

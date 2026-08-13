@@ -3,10 +3,10 @@
 {% block content %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
-<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+<header class="sd-page-header d-flex flex-wrap justify-content-between align-items-start gap-2">
     <div>
         <h1 class="sd-page-title">Purchases</h1>
-        <p class="sd-page-sub mb-0">Stock-in from suppliers — each save writes matching stock movements.</p>
+        <p class="sd-page-sub">Stock-in from suppliers — each save writes matching stock movements.</p>
     </div>
     {% if perms.purchases.add_purchase %}
     <a href="{% url 'purchases:purchase_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
