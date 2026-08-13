@@ -126,7 +126,21 @@
   const addBtn = document.getElementById("add-purchase-line");
 
   function money(n) {
-    return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+    const fixed = (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+    const neg = fixed.startsWith("-");
+    const [whole, frac] = (neg ? fixed.slice(1) : fixed).split(".");
+    let grouped = whole;
+    if (whole.length > 3) {
+      const last3 = whole.slice(-3);
+      let rest = whole.slice(0, -3);
+      const parts = [];
+      while (rest.length) {
+        parts.unshift(rest.slice(-2));
+        rest = rest.slice(0, -2);
+      }
+      grouped = parts.join(",") + "," + last3;
+    }
+    return (neg ? "-" : "") + grouped + "." + frac;
   }
 
   /**

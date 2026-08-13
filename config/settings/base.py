@@ -66,6 +66,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.role_flags",
             ],
+            # Available in every template — ₹{{ amount|inr }} → 2,88,48,772.13
+            "builtins": ["apps.core.templatetags.money"],
         },
     },
 ]
