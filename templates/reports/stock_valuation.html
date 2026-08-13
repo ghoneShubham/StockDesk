@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Stock valuation · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:financial' as financial_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=financial_url back_label="Financial" home_url=dashboard_url home_label="Dashboard" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Stock valuation</h1>
+        <p class="sd-page-sub mb-0">Current stock × purchase price for active products with qty &gt; 0.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="?export=csv"><i class="bi bi-download"></i> CSV</a>
+</header>
+<div class="sd-panel mb-3">
+    <div class="d-flex flex-wrap gap-4">
+        <div>
+            <div class="text-muted small">Products valued</div>
+            <div class="fs-4 fw-semibold">{{ product_count }}</div>
+        </div>
+        <div>
+            <div class="text-muted small">Total value</div>
+            <div class="fs-4 fw-semibold">₹{{ total_value }}</div>
+        </div>
+    </div>
+</div>
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr><th>SKU</th><th>Name</th><th>Category</th><th>Qty</th><th>Purchase price</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+                {% for r in lines %}
+                <tr>
+                    <td>{{ r.sku }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category }}</td>
+                    <td>{{ r.stock_qty }}</td>
+                    <td>₹{{ r.purchase_price }}</td>
+                    <td>₹{{ r.value }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-muted p-4">No stock on hand.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

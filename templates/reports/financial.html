@@ -4,12 +4,23 @@
 {% url 'reports:index' as reports_url %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
-<header>
+<header class="mb-3">
     <h1 class="sd-page-title">Financial reports</h1>
-    <p class="sd-page-sub">Margin, valuation, and P&amp;L — Owner only. Full report queries arrive on Days 11–12.</p>
+    <p class="sd-page-sub mb-0">Margin and stock valuation — Owner only. Cashier / Manager get HTTP 403.</p>
 </header>
 <section class="sd-panel">
-    <h2>Owner-only area</h2>
-    <p class="text-muted mb-0">If a Cashier or Store Manager opens this URL, Django returns HTTP 403.</p>
+    <div class="list-group list-group-flush">
+        {% for r in financial_reports %}
+        <a href="{% url r.url_name %}" class="list-group-item list-group-item-action px-0">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div>
+                    <strong>{{ r.name }}</strong>
+                    <div class="small text-muted">{{ r.desc }}</div>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
 </section>
 {% endblock %}

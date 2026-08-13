@@ -1,0 +1,21 @@
+<form method="get" class="sd-panel mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-4 col-md-3">
+            <label class="form-label" for="id_date_from">From</label>
+            {{ form.date_from }}
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <label class="form-label" for="id_date_to">To</label>
+            {{ form.date_to }}
+        </div>
+        <div class="col-sm-4 col-md-6 d-flex flex-wrap gap-2">
+            <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.55rem 1.1rem;">Apply</button>
+            <a class="btn btn-outline-secondary" href="?date_from={{ date_from|date:'Y-m-d' }}&amp;date_to={{ date_to|date:'Y-m-d' }}&amp;export=csv">
+                <i class="bi bi-download"></i> CSV
+            </a>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+    <div class="text-danger small mt-2">{{ form.non_field_errors }}</div>
+    {% endif %}
+</form>

@@ -1,8 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.http import JsonResponse
-from django.views import View
 from django.views.generic import TemplateView
+
+from apps.reports import queries as report_queries
 
 
 def health_check(request):
@@ -22,6 +23,14 @@ def health_check(request):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    """Module G — owner/manager landing page. Populated fully once sales/inventory exist (Day 6+)."""
+    """Module G — today's sales, month sales, low stock, pending payments, top 5."""
 
     template_name = "core/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        metrics = report_queries.dashboard_metrics()
+        ctx.update(metrics)
+        user = self.request.user
+        ctx["can_see_low_stock"] = user.has_perm("reports.view_operational_reports")
+        return ctx

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Top products · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="mb-3">
+    <h1 class="sd-page-title">Top 10 products</h1>
+    <p class="sd-page-sub mb-0">Ranked by revenue and by quantity sold for the selected period.</p>
+</header>
+{% include "reports/_date_filter.html" %}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <section class="sd-panel p-0 overflow-hidden">
+            <div class="p-3 border-bottom"><h2 class="h5 mb-0">By revenue</h2></div>
+            <div class="table-responsive">
+                <table class="table sd-table mb-0">
+                    <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+                    <tbody>
+                        {% for r in rows.by_revenue %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ r.product__sku }} — {{ r.product__name }}</td>
+                            <td>{{ r.qty_sold }}</td>
+                            <td>₹{{ r.revenue }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-muted p-4">No sales in range.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="sd-panel p-0 overflow-hidden">
+            <div class="p-3 border-bottom"><h2 class="h5 mb-0">By quantity</h2></div>
+            <div class="table-responsive">
+                <table class="table sd-table mb-0">
+                    <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+                    <tbody>
+                        {% for r in rows.by_quantity %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ r.product__sku }} — {{ r.product__name }}</td>
+                            <td>{{ r.qty_sold }}</td>
+                            <td>₹{{ r.revenue }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-muted p-4">No sales in range.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

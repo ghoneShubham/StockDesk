@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Supplier purchases · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="mb-3">
+    <h1 class="sd-page-title">Supplier purchases</h1>
+    <p class="sd-page-sub mb-0">Purchase totals and distinct product count per supplier.</p>
+</header>
+{% include "reports/_date_filter.html" %}
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr><th>Supplier</th><th>Purchases</th><th>Distinct products</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td>{{ r.supplier__name }}</td>
+                    <td>{{ r.purchase_count }}</td>
+                    <td>{{ r.distinct_products }}</td>
+                    <td>₹{{ r.total_amount }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-muted p-4">No purchases in this range.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Invoice integrity · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="sd-page-title">Invoice integrity</h1>
+        <p class="sd-page-sub mb-0">Invoices where line sums disagree with subtotal, or header total ≠ subtotal − discount + tax.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="?export=csv"><i class="bi bi-download"></i> CSV</a>
+</header>
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Subtotal</th>
+                    <th>Lines sum</th>
+                    <th>Discount</th>
+                    <th>Tax</th>
+                    <th>Total</th>
+                    <th>Expected</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td><a href="{% url 'sales:sale_detail' r.id %}">{{ r.invoice_no }}</a></td>
+                    <td>{{ r.sale_date|date:"d M Y H:i" }}</td>
+                    <td>₹{{ r.subtotal }}</td>
+                    <td>₹{{ r.lines_sum }}</td>
+                    <td>₹{{ r.discount }}</td>
+                    <td>₹{{ r.tax }}</td>
+                    <td>₹{{ r.total_amount }}</td>
+                    <td>₹{{ r.expected_total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-muted p-4">No integrity issues found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

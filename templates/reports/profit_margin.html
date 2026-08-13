@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Profit margin · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:financial' as financial_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=financial_url back_label="Financial" home_url=dashboard_url home_label="Dashboard" %}
+<header class="mb-3">
+    <h1 class="sd-page-title">Profit margin by product</h1>
+    <p class="sd-page-sub mb-0">Revenue − (qty × purchase price). Margin % is blank when revenue is zero.</p>
+</header>
+{% include "reports/_date_filter.html" %}
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Qty</th>
+                    <th>Revenue</th>
+                    <th>Cost</th>
+                    <th>Profit</th>
+                    <th>Margin %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td>{{ r.sku }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.qty_sold }}</td>
+                    <td>₹{{ r.revenue }}</td>
+                    <td>₹{{ r.cost }}</td>
+                    <td>₹{{ r.profit }}</td>
+                    <td>{% if r.margin_pct is None %}—{% else %}{{ r.margin_pct }}%{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-muted p-4">No sales in this range.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
