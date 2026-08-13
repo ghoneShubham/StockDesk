@@ -48,7 +48,7 @@
                     <td>{{ sale.sale_date|date:"d M Y H:i" }}</td>
                     <td>{% if sale.customer %}{{ sale.customer.name }}{% else %}<span class="text-muted">Walk-in</span>{% endif %}</td>
                     <td>{{ sale.line_count }}</td>
-                    <td>₹{{ sale.total_amount }}</td>
+                    <td>₹{{ sale.total_amount|inr }}</td>
                     <td>{{ sale.get_payment_status_display }}</td>
                     <td>{{ sale.created_by|default:"—" }}</td>
                 </tr>

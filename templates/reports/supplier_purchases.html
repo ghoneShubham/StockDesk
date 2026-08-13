@@ -21,7 +21,7 @@
                     <td>{{ r.supplier__name }}</td>
                     <td>{{ r.purchase_count }}</td>
                     <td>{{ r.distinct_products }}</td>
-                    <td>₹{{ r.total_amount }}</td>
+                    <td>₹{{ r.total_amount|inr }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="4" class="text-muted p-4">No purchases in this range.</td></tr>

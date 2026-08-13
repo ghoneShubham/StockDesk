@@ -33,9 +33,9 @@
                 <dt class="col-sm-4">Unit</dt><dd class="col-sm-8">{{ product.get_unit_display }}</dd>
                 <dt class="col-sm-4">HSN</dt><dd class="col-sm-8">{{ product.hsn_code|default:"—" }}</dd>
                 {% if can_view_purchase_price %}
-                <dt class="col-sm-4">Purchase price</dt><dd class="col-sm-8">₹{{ product.purchase_price }}</dd>
+                <dt class="col-sm-4">Purchase price</dt><dd class="col-sm-8">₹{{ product.purchase_price|inr }}</dd>
                 {% endif %}
-                <dt class="col-sm-4">Sale price</dt><dd class="col-sm-8">₹{{ product.sale_price }}</dd>
+                <dt class="col-sm-4">Sale price</dt><dd class="col-sm-8">₹{{ product.sale_price|inr }}</dd>
                 <dt class="col-sm-4">In stock</dt>
                 <dd class="col-sm-8">
                     {% if stock_qty <= product.reorder_level %}

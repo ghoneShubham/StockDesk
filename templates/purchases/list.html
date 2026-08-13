@@ -49,7 +49,7 @@
                     <td>{{ purchase.supplier.name }}</td>
                     <td>{{ purchase.supplier_invoice_no|default:"—" }}</td>
                     <td>{{ purchase.line_count }}</td>
-                    <td>₹{{ purchase.total_amount }}</td>
+                    <td>₹{{ purchase.total_amount|inr }}</td>
                     <td>{{ purchase.created_by|default:"—" }}</td>
                 </tr>
                 {% empty %}

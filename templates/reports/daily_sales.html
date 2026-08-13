@@ -20,7 +20,7 @@
                 <tr>
                     <td>{{ r.day|date:"d M Y" }}</td>
                     <td>{{ r.invoice_count }}</td>
-                    <td>₹{{ r.total_sales }}</td>
+                    <td>₹{{ r.total_sales|inr }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="3" class="text-muted p-4">No data for this range.</td></tr>
@@ -31,7 +31,7 @@
                 <tr>
                     <th>Total</th>
                     <th>{{ grand_invoices }}</th>
-                    <th>₹{{ grand_total }}</th>
+                    <th>₹{{ grand_total|inr }}</th>
                 </tr>
             </tfoot>
             {% endif %}

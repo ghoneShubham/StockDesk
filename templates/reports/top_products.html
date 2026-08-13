@@ -23,7 +23,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ r.product__sku }} — {{ r.product__name }}</td>
                             <td>{{ r.qty_sold }}</td>
-                            <td>₹{{ r.revenue }}</td>
+                            <td>₹{{ r.revenue|inr }}</td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="4" class="text-muted p-4">No sales in range.</td></tr>
@@ -45,7 +45,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ r.product__sku }} — {{ r.product__name }}</td>
                             <td>{{ r.qty_sold }}</td>
-                            <td>₹{{ r.revenue }}</td>
+                            <td>₹{{ r.revenue|inr }}</td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="4" class="text-muted p-4">No sales in range.</td></tr>

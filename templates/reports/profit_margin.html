@@ -29,9 +29,9 @@
                     <td>{{ r.sku }}</td>
                     <td>{{ r.name }}</td>
                     <td>{{ r.qty_sold }}</td>
-                    <td>₹{{ r.revenue }}</td>
-                    <td>₹{{ r.cost }}</td>
-                    <td>₹{{ r.profit }}</td>
+                    <td>₹{{ r.revenue|inr }}</td>
+                    <td>₹{{ r.cost|inr }}</td>
+                    <td>₹{{ r.profit|inr }}</td>
                     <td>{% if r.margin_pct is None %}—{% else %}{{ r.margin_pct }}%{% endif %}</td>
                 </tr>
                 {% empty %}

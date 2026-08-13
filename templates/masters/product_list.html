@@ -65,8 +65,8 @@
                         {% if not product.is_active %}<span class="badge text-bg-secondary ms-1">Inactive</span>{% endif %}
                     </td>
                     <td>{{ product.category.name }}</td>
-                    {% if can_view_purchase_price %}<td>₹{{ product.purchase_price }}</td>{% endif %}
-                    <td>₹{{ product.sale_price }}</td>
+                    {% if can_view_purchase_price %}<td>₹{{ product.purchase_price|inr }}</td>{% endif %}
+                    <td>₹{{ product.sale_price|inr }}</td>
                     <td>
                         {% if product.stock_qty <= product.reorder_level %}
                         <span class="text-danger fw-semibold">{{ product.stock_qty }}</span>

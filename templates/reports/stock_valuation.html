@@ -19,7 +19,7 @@
         </div>
         <div>
             <div class="text-muted small">Total value</div>
-            <div class="fs-4 fw-semibold">₹{{ total_value }}</div>
+            <div class="fs-4 fw-semibold">₹{{ total_value|inr }}</div>
         </div>
     </div>
 </div>
@@ -36,8 +36,8 @@
                     <td>{{ r.name }}</td>
                     <td>{{ r.category }}</td>
                     <td>{{ r.stock_qty }}</td>
-                    <td>₹{{ r.purchase_price }}</td>
-                    <td>₹{{ r.value }}</td>
+                    <td>₹{{ r.purchase_price|inr }}</td>
+                    <td>₹{{ r.value|inr }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="6" class="text-muted p-4">No stock on hand.</td></tr>

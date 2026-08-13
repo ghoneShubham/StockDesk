@@ -43,28 +43,28 @@
                         <tr>
                             <td>{{ item.product.sku }} — {{ item.product.name }}</td>
                             <td>{{ item.qty }}</td>
-                            <td>₹{{ item.rate }}</td>
-                            <td>₹{{ item.discount }}</td>
-                            <td>₹{{ item.amount }}</td>
+                            <td>₹{{ item.rate|inr }}</td>
+                            <td>₹{{ item.discount|inr }}</td>
+                            <td>₹{{ item.amount|inr }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="4" class="text-end">Subtotal</th>
-                            <th>₹{{ sale.subtotal }}</th>
+                            <th>₹{{ sale.subtotal|inr }}</th>
                         </tr>
                         <tr>
                             <th colspan="4" class="text-end">Invoice discount</th>
-                            <th>₹{{ sale.discount }}</th>
+                            <th>₹{{ sale.discount|inr }}</th>
                         </tr>
                         <tr>
                             <th colspan="4" class="text-end">Tax</th>
-                            <th>₹{{ sale.tax }}</th>
+                            <th>₹{{ sale.tax|inr }}</th>
                         </tr>
                         <tr>
                             <th colspan="4" class="text-end">Total</th>
-                            <th>₹{{ sale.total_amount }}</th>
+                            <th>₹{{ sale.total_amount|inr }}</th>
                         </tr>
                     </tfoot>
                 </table>
