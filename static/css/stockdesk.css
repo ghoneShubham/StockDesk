@@ -516,13 +516,23 @@ a.sd-metric .sd-metric__value {
 }
 
 .sd-rank--2 {
-    background: linear-gradient(135deg, #c5d9ec, var(--sd-blue-light));
-    color: var(--sd-blue-deep);
+    background: linear-gradient(135deg, #7eb6df, var(--sd-blue));
+    color: #fff;
 }
 
 .sd-rank--3 {
-    background: linear-gradient(135deg, #c9dcc8, var(--sd-sage));
-    color: #2f442e;
+    background: linear-gradient(135deg, #a8c4a7, var(--sd-sage));
+    color: #fff;
+}
+
+.sd-rank--4 {
+    background: linear-gradient(135deg, #f0d56a, #c9a227);
+    color: var(--sd-blue-deep);
+}
+
+.sd-rank--5 {
+    background: linear-gradient(135deg, #8aa4c4, var(--sd-blue-deep));
+    color: #fff;
 }
 
 /* ---------- Alerts ---------- */

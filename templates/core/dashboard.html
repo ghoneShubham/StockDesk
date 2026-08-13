@@ -62,7 +62,7 @@
                 {% for p in top_products %}
                 <tr>
                     <td>
-                        <span class="sd-rank {% if forloop.counter <= 3 %}sd-rank--{{ forloop.counter }}{% endif %}">{{ forloop.counter }}</span>
+                        <span class="sd-rank sd-rank--{{ forloop.counter }}">{{ forloop.counter }}</span>
                     </td>
                     <td><strong>{{ p.product__sku }}</strong> — {{ p.product__name }}</td>
                     <td>{{ p.qty_sold }}</td>
