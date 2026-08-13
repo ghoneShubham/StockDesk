@@ -40,16 +40,24 @@
             </thead>
             <tbody>
                 {% for row in history_rows %}
+                {% if row.movement.reference_type == "purchase" %}
+                <tr class="sd-row-link" data-href="{% url 'purchases:purchase_detail' row.movement.reference_id %}" tabindex="0" role="link" aria-label="Open purchase {{ row.movement.reference_id }}">
+                {% elif row.movement.reference_type == "sale" %}
+                <tr class="sd-row-link" data-href="{% url 'sales:sale_detail' row.movement.reference_id %}" tabindex="0" role="link" aria-label="Open sale {{ row.movement.reference_id }}">
+                {% elif row.movement.reference_type == "adjustment" %}
+                <tr class="sd-row-link" data-href="{% url 'inventory:adjustment_detail' row.movement.reference_id %}" tabindex="0" role="link" aria-label="Open adjustment {{ row.movement.reference_id }}">
+                {% else %}
                 <tr>
+                {% endif %}
                     <td>{{ row.movement.created_at|date:"d M Y H:i" }}</td>
                     <td>{{ row.movement.get_movement_type_display }}</td>
                     <td>
                         {% if row.movement.reference_type == "purchase" %}
-                        <a href="{% url 'purchases:purchase_detail' row.movement.reference_id %}">Purchase #{{ row.movement.reference_id }}</a>
+                        Purchase #{{ row.movement.reference_id }}
                         {% elif row.movement.reference_type == "sale" %}
-                        <a href="{% url 'sales:sale_detail' row.movement.reference_id %}">Sale #{{ row.movement.reference_id }}</a>
+                        Sale #{{ row.movement.reference_id }}
                         {% elif row.movement.reference_type == "adjustment" %}
-                        <a href="{% url 'inventory:adjustment_detail' row.movement.reference_id %}">Adj #{{ row.movement.reference_id }}</a>
+                        Adj #{{ row.movement.reference_id }}
                         {% else %}
                         {{ row.movement.reference_type }} #{{ row.movement.reference_id }}
                         {% endif %}

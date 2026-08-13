@@ -28,8 +28,8 @@
             </thead>
             <tbody>
                 {% for r in rows %}
-                <tr>
-                    <td><a href="{% url 'sales:sale_detail' r.id %}">{{ r.invoice_no }}</a></td>
+                <tr class="sd-row-link" data-href="{% url 'sales:sale_detail' r.id %}" tabindex="0" role="link" aria-label="Open invoice {{ r.invoice_no }}">
+                    <td>{{ r.invoice_no }}</td>
                     <td>{{ r.sale_date|date:"d M Y H:i" }}</td>
                     <td>₹{{ r.subtotal }}</td>
                     <td>₹{{ r.lines_sum }}</td>

@@ -57,7 +57,7 @@
                     <td>{{ adj.created_by|default:"—" }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="6" class="text-muted p-4">No adjustments yet. <a href="{% url 'inventory:adjustment_create' %}">Record the first one</a>.</td></tr>
+                <tr><td colspan="6" class="text-muted p-4">No adjustments yet. <a href="{% url 'inventory:adjustment_create' %}" class="btn btn-sm btn-outline-primary ms-1">New adjustment</a></td></tr>
                 {% endfor %}
             </tbody>
         </table>

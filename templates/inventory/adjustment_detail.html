@@ -34,7 +34,7 @@
                 <dd class="col-sm-8">{{ adjustment.created_by|default:"—" }}</dd>
             </dl>
             <p class="mt-3 mb-0">
-                <a href="{% url 'inventory:product_stock_history' adjustment.product_id %}">View product stock history</a>
+                <a href="{% url 'inventory:product_stock_history' adjustment.product_id %}" class="btn btn-outline-primary">Stock history</a>
             </p>
         </section>
     </div>

@@ -53,7 +53,7 @@
                     <td>{{ sale.created_by|default:"—" }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-muted p-4">No sales yet. <a href="{% url 'sales:sale_create' %}">Create the first invoice</a>.</td></tr>
+                <tr><td colspan="7" class="text-muted p-4">No sales yet. <a href="{% url 'sales:sale_create' %}" class="btn btn-sm btn-outline-primary ms-1">New sale</a></td></tr>
                 {% endfor %}
             </tbody>
         </table>

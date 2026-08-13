@@ -28,8 +28,17 @@
 {% if perms.reports.view_financial_reports %}
 <section class="sd-panel mt-3">
     <h2>Financial</h2>
-    <p class="text-muted mb-2">Margin and valuation — Owner only.</p>
-    <a href="{% url 'reports:financial' %}">Open financial reports →</a>
+    <div class="list-group list-group-flush sd-report-list">
+        <a href="{% url 'reports:financial' %}" class="list-group-item list-group-item-action px-0" aria-label="Open financial reports">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div>
+                    <strong>Financial reports</strong>
+                    <div class="small text-muted">Margin and valuation — Owner only</div>
+                </div>
+                <i class="bi bi-arrow-right-circle text-muted"></i>
+            </div>
+        </a>
+    </div>
 </section>
 {% endif %}
 {% endblock %}
