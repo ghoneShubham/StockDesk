@@ -24,17 +24,21 @@
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
+        {% if can_see_low_stock %}
+        <a href="{% url 'reports:low_stock' %}" class="sd-metric sd-metric--amber" aria-label="Open low stock report">
+            <div class="sd-metric__icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="sd-metric__label">Low Stock</div>
+            <div class="sd-metric__value">{{ low_stock_count }}</div>
+            <div class="sd-metric__meta">At or below reorder level</div>
+        </a>
+        {% else %}
         <div class="sd-metric sd-metric--amber">
             <div class="sd-metric__icon"><i class="bi bi-exclamation-triangle"></i></div>
             <div class="sd-metric__label">Low Stock</div>
-            {% if can_see_low_stock %}
-            <div class="sd-metric__value">{{ low_stock_count }}</div>
-            <div class="sd-metric__meta"><a href="{% url 'reports:low_stock' %}">View report →</a></div>
-            {% else %}
             <div class="sd-metric__value">&mdash;</div>
             <div class="sd-metric__meta">Manager / Owner only</div>
-            {% endif %}
         </div>
+        {% endif %}
     </div>
     <div class="col-sm-6 col-xl-3">
         <div class="sd-metric sd-metric--ink">
