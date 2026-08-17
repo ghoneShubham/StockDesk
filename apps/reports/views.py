@@ -11,8 +11,9 @@ from django.views.generic import TemplateView
 from apps.core.mixins import PermissionRequiredMixin
 
 from . import queries
+from . import queries_set2
 from .csv_export import csv_response
-from .forms import DateRangeForm
+from .forms import DateRangeForm, MonthForm
 
 
 class ReportsIndexView(PermissionRequiredMixin, TemplateView):
@@ -29,6 +30,10 @@ class ReportsIndexView(PermissionRequiredMixin, TemplateView):
             {"name": "Supplier purchases", "url_name": "reports:supplier_purchases", "desc": "Totals and distinct products"},
             {"name": "Dead stock", "url_name": "reports:dead_stock", "desc": "On hand, no movement in 60 days"},
             {"name": "Invoice integrity", "url_name": "reports:integrity", "desc": "Line totals that disagree with headers"},
+            {"name": "Running total (month)", "url_name": "reports:running_total", "desc": "Day-by-day running sales — SUM() OVER"},
+            {"name": "Product rank by category", "url_name": "reports:product_rank", "desc": "RANK() OVER (PARTITION BY category)"},
+            {"name": "Month-on-month growth", "url_name": "reports:mom_growth", "desc": "Growth % via LAG()"},
+            {"name": "Latest invoice per customer", "url_name": "reports:latest_invoice", "desc": "ROW_NUMBER() = 1 per customer"},
         ]
         return ctx
 
@@ -320,3 +325,133 @@ class ProfitMarginReportView(_DateRangeReportView):
                 r["profit"],
                 "" if r["margin_pct"] is None else r["margin_pct"],
             ]
+
+
+class RunningTotalReportView(PermissionRequiredMixin, TemplateView):
+    """Set 2 #10 — SUM() OVER running total for one calendar month."""
+
+    permission_required = "reports.view_operational_reports"
+    template_name = "reports/running_total.html"
+
+    def get_form(self):
+        if self.request.GET.get("year") or self.request.GET.get("month"):
+            return MonthForm(self.request.GET)
+        return MonthForm()
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_bound and form.is_valid():
+            year = form.cleaned_data["year"]
+            month = form.cleaned_data["month"]
+        elif not form.is_bound:
+            year = form.fields["year"].initial
+            month = form.fields["month"].initial
+        else:
+            year = form.fields["year"].initial
+            month = form.fields["month"].initial
+            self.form = form
+            self.year = year
+            self.month = month
+            self.rows = []
+            return super().get(request, *args, **kwargs)
+
+        rows = queries_set2.running_total_window(year, month)
+        if request.GET.get("export") == "csv" and (not form.is_bound or form.is_valid()):
+            return csv_response(
+                "running_total.csv",
+                ["Date", "Day total", "Running total"],
+                ([r["day"].isoformat(), r["day_total"], r["running_total"]] for r in rows),
+            )
+        self.form = form
+        self.year = year
+        self.month = month
+        self.rows = rows
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form"] = self.form
+        ctx["year"] = self.year
+        ctx["month"] = self.month
+        ctx["rows"] = self.rows
+        return ctx
+
+
+class ProductRankReportView(_DateRangeReportView):
+    """Set 2 #11 — RANK() OVER (PARTITION BY category)."""
+
+    template_name = "reports/product_rank.html"
+    csv_filename = "product_rank.csv"
+    default_days = 30
+
+    def build_rows(self, date_from, date_to):
+        return queries_set2.product_rank_window(date_from, date_to)
+
+    def csv_headers(self):
+        return ["Category", "Rank", "SKU", "Name", "Revenue"]
+
+    def csv_rows(self, rows):
+        for r in rows:
+            yield [r["category"], r["rank"], r["sku"], r["name"], r["revenue"]]
+
+
+class MomGrowthReportView(PermissionRequiredMixin, TemplateView):
+    """Set 2 #12 — LAG() month-on-month growth."""
+
+    permission_required = "reports.view_operational_reports"
+    template_name = "reports/mom_growth.html"
+
+    def get(self, request, *args, **kwargs):
+        self.rows = queries_set2.mom_growth_window(months_back=12)
+        if request.GET.get("export") == "csv":
+            return csv_response(
+                "mom_growth.csv",
+                ["Month", "Total", "Previous", "Growth %"],
+                (
+                    [
+                        r["month"].isoformat() if hasattr(r["month"], "isoformat") else r["month"],
+                        r["total"],
+                        r["prev_total"] if r["prev_total"] is not None else "",
+                        r["growth_pct"] if r["growth_pct"] is not None else "",
+                    ]
+                    for r in self.rows
+                ),
+            )
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["rows"] = self.rows
+        return ctx
+
+
+class LatestInvoiceReportView(PermissionRequiredMixin, TemplateView):
+    """Set 2 #13 — ROW_NUMBER() latest invoice per customer."""
+
+    permission_required = "reports.view_operational_reports"
+    template_name = "reports/latest_invoice.html"
+
+    def get(self, request, *args, **kwargs):
+        self.rows = queries_set2.latest_invoice_window()
+        if request.GET.get("export") == "csv":
+            return csv_response(
+                "latest_invoice.csv",
+                ["Customer", "Phone", "Invoice", "Sale date", "Total", "Payment"],
+                (
+                    [
+                        r["customer__name"],
+                        r["customer__phone"],
+                        r["invoice_no"],
+                        r["sale_date"].isoformat(),
+                        r["total_amount"],
+                        r["payment_status"],
+                    ]
+                    for r in self.rows
+                ),
+            )
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["rows"] = self.rows
+        return ctx

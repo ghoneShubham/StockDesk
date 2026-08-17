@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Running total · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="sd-page-header">
+    <h1 class="sd-page-title">Running total (month)</h1>
+    <p class="sd-page-sub">Day-by-day sales with a cumulative total — <code>SUM() OVER (ORDER BY day)</code>.</p>
+</header>
+<form method="get" class="sd-panel mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-3">
+            <label class="form-label" for="id_year">Year</label>
+            {{ form.year }}
+        </div>
+        <div class="col-sm-3">
+            <label class="form-label" for="id_month">Month</label>
+            {{ form.month }}
+        </div>
+        <div class="col-sm-6 d-flex flex-wrap gap-2">
+            <button type="submit" class="sd-btn-primary" style="width:auto;padding:0.55rem 1.1rem;">Apply</button>
+            <a class="btn btn-outline-secondary" href="?year={{ year }}&amp;month={{ month }}&amp;export=csv">
+                <i class="bi bi-download"></i> CSV
+            </a>
+        </div>
+    </div>
+</form>
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr><th>Date</th><th>Day total</th><th>Running total</th></tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td>{{ r.day|date:"d M Y" }}</td>
+                    <td>₹{{ r.day_total|inr }}</td>
+                    <td><strong>₹{{ r.running_total|inr }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-muted p-4">No data for this month.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

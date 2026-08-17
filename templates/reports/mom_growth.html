@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}MoM growth · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:index' as reports_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=reports_url back_label="Reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div class="sd-page-header flex-grow-1 mb-0">
+        <h1 class="sd-page-title">Month-on-month growth</h1>
+        <p class="sd-page-sub">Last 12 months vs prior month — <code>LAG(total) OVER (ORDER BY month)</code>.</p>
+    </div>
+    <a class="btn btn-outline-secondary align-self-start" href="?export=csv"><i class="bi bi-download"></i> CSV</a>
+</header>
+<div class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr><th>Month</th><th>Total</th><th>Previous</th><th>Growth %</th></tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td>{{ r.month|date:"M Y" }}</td>
+                    <td>₹{{ r.total|inr }}</td>
+                    <td>{% if r.prev_total is None %}—{% else %}₹{{ r.prev_total|inr }}{% endif %}</td>
+                    <td>
+                        {% if r.growth_pct is None %}
+                        —
+                        {% else %}
+                        {{ r.growth_pct }}%
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-muted p-4">No monthly sales yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

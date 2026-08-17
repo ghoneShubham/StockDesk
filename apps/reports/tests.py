@@ -14,6 +14,8 @@ from apps.core.permissions import CASHIER, OWNER, STORE_MANAGER
 from apps.masters.models import Category, Customer, Product, Supplier
 from apps.purchases.services import create_purchase_with_stock
 from apps.reports import queries
+from apps.reports import queries_set2
+from apps.reports import sql_raw
 from apps.sales.models import Sale
 from apps.sales.services import create_sale_with_stock
 
@@ -184,3 +186,132 @@ def test_dashboard_shows_metrics(client, user_factory, catalog):
     assert response.status_code == 200
     assert response.context["today_total"] == Decimal("100.00")
     assert response.context["today_count"] == 1
+
+
+# ----- Day 12 — Set 2 + raw SQL parity -----
+
+
+@pytest.mark.django_db
+def test_running_total_window_matches_subquery(user_factory, catalog):
+    owner = user_factory("owner_rt", OWNER)
+    today = timezone.localdate()
+    create_purchase_with_stock(
+        supplier=catalog["supplier"],
+        purchase_date=today,
+        supplier_invoice_no="RT1",
+        lines=[{"product": catalog["product"], "qty": Decimal("20"), "rate": catalog["product"].purchase_price}],
+        user=owner,
+    )
+    create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["product"], "qty": Decimal("2"), "rate": Decimal("100.00"), "discount": Decimal("0")}],
+        user=owner,
+    )
+    sub = queries_set2.running_total_subquery(today.year, today.month)
+    win = queries_set2.running_total_window(today.year, today.month)
+    assert len(sub) == len(win)
+    assert sub[-1]["running_total"] == win[-1]["running_total"]
+    assert win[-1]["running_total"] == Decimal("200.00")
+
+
+@pytest.mark.django_db
+def test_product_rank_window_matches_subquery(user_factory, catalog):
+    owner = user_factory("owner_rank", OWNER)
+    cat2 = Category.objects.create(name="ReportCat2")
+    p2 = Product.objects.create(
+        sku="RPT-2",
+        name="Other Widget",
+        category=cat2,
+        purchase_price=Decimal("10.00"),
+        sale_price=Decimal("50.00"),
+        reorder_level=1,
+    )
+    create_purchase_with_stock(
+        supplier=catalog["supplier"],
+        purchase_date=timezone.localdate(),
+        supplier_invoice_no="RK1",
+        lines=[
+            {"product": catalog["product"], "qty": Decimal("10"), "rate": catalog["product"].purchase_price},
+            {"product": p2, "qty": Decimal("10"), "rate": p2.purchase_price},
+        ],
+        user=owner,
+    )
+    create_sale_with_stock(
+        customer=None,
+        sale_date=timezone.now(),
+        lines=[
+            {"product": catalog["product"], "qty": Decimal("3"), "rate": Decimal("100.00"), "discount": Decimal("0")},
+            {"product": p2, "qty": Decimal("1"), "rate": Decimal("50.00"), "discount": Decimal("0")},
+        ],
+        user=owner,
+    )
+    today = timezone.localdate()
+    sub = { (r["sku"], r["rank"]) for r in queries_set2.product_rank_subquery(today, today) }
+    win = { (r["sku"], r["rank"]) for r in queries_set2.product_rank_window(today, today) }
+    assert sub == win
+    assert ("RPT-1", 1) in win
+    assert ("RPT-2", 1) in win
+
+
+@pytest.mark.django_db
+def test_latest_invoice_window_one_per_customer(user_factory, catalog):
+    owner = user_factory("owner_li", OWNER)
+    create_purchase_with_stock(
+        supplier=catalog["supplier"],
+        purchase_date=timezone.localdate(),
+        supplier_invoice_no="LI1",
+        lines=[{"product": catalog["product"], "qty": Decimal("10"), "rate": catalog["product"].purchase_price}],
+        user=owner,
+    )
+    create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now() - timedelta(days=2),
+        lines=[{"product": catalog["product"], "qty": Decimal("1"), "rate": Decimal("100.00"), "discount": Decimal("0")}],
+        user=owner,
+    )
+    newer = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["product"], "qty": Decimal("1"), "rate": Decimal("100.00"), "discount": Decimal("0")}],
+        user=owner,
+    )
+    rows = queries_set2.latest_invoice_window()
+    mine = [r for r in rows if r["customer_id"] == catalog["customer"].id]
+    assert len(mine) == 1
+    assert mine[0]["invoice_no"] == newer.invoice_no
+
+    sub = queries_set2.latest_invoice_subquery()
+    sub_mine = [r for r in sub if r["customer_id"] == catalog["customer"].id]
+    assert sub_mine[0]["invoice_no"] == newer.invoice_no
+
+
+@pytest.mark.django_db
+def test_mom_growth_raw_runs(user_factory, catalog):
+    owner = user_factory("owner_mom", OWNER)
+    create_purchase_with_stock(
+        supplier=catalog["supplier"],
+        purchase_date=timezone.localdate(),
+        supplier_invoice_no="MOM1",
+        lines=[{"product": catalog["product"], "qty": Decimal("5"), "rate": catalog["product"].purchase_price}],
+        user=owner,
+    )
+    create_sale_with_stock(
+        customer=None,
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["product"], "qty": Decimal("1"), "rate": Decimal("100.00"), "discount": Decimal("0")}],
+        user=owner,
+    )
+    rows = sql_raw.mom_growth_window(months_back=3)
+    assert len(rows) >= 1
+    assert rows[-1]["total"] >= Decimal("100.00")
+
+
+@pytest.mark.django_db
+def test_set2_report_pages_and_csv(client, user_factory):
+    user_factory("owner_s2", OWNER)
+    assert client.login(username="owner_s2", password="pass1234!")
+    for name in ("running_total", "product_rank", "mom_growth", "latest_invoice"):
+        url = reverse(f"reports:{name}")
+        assert client.get(url).status_code == 200
+        assert client.get(url, {"export": "csv"}).status_code == 200

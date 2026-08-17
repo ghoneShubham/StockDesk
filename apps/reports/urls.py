@@ -18,4 +18,9 @@ urlpatterns = [
     # Set 1 — financial (Owner)
     path("stock-valuation/", views.StockValuationReportView.as_view(), name="stock_valuation"),
     path("profit-margin/", views.ProfitMarginReportView.as_view(), name="profit_margin"),
+    # Set 2 — window functions
+    path("running-total/", views.RunningTotalReportView.as_view(), name="running_total"),
+    path("product-rank/", views.ProductRankReportView.as_view(), name="product_rank"),
+    path("mom-growth/", views.MomGrowthReportView.as_view(), name="mom_growth"),
+    path("latest-invoice/", views.LatestInvoiceReportView.as_view(), name="latest_invoice"),
 ]

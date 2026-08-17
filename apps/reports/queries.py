@@ -1,8 +1,7 @@
 """
 Reports Set 1 — Django ORM implementations (PRD Section 8).
 
-Day 11 ships the operational/financial report screens on these helpers.
-Day 12 adds matching raw SQL + docs/SQL.md comparisons.
+Day 11: report screens. Day 12: matching raw SQL in sql_raw.py + docs/SQL.md.
 """
 
 from __future__ import annotations
