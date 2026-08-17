@@ -33,7 +33,7 @@ import django
 django.setup()
 
 from django.contrib.auth import get_user_model  # noqa: E402
-from django.contrib.auth.models import Group  # noqa: E402
+from django.contrib.auth.models import AbstractUser, Group  # noqa: E402
 from django.core.management import call_command  # noqa: E402
 from django.db import connection  # noqa: E402
 from django.db.models import Sum  # noqa: E402
@@ -46,7 +46,7 @@ from apps.purchases.services import create_purchase_with_stock  # noqa: E402
 from apps.sales.models import Sale  # noqa: E402
 from apps.sales.services import InsufficientStockError, create_sale_with_stock  # noqa: E402
 
-User = get_user_model()
+UserModel = get_user_model()
 
 
 def stock_of(product: Product) -> Decimal:
@@ -54,8 +54,8 @@ def stock_of(product: Product) -> Decimal:
     return total or Decimal("0")
 
 
-def ensure_user(username: str, group_name: str) -> User:
-    user, created = User.objects.get_or_create(
+def ensure_user(username: str, group_name: str) -> AbstractUser:
+    user, created = UserModel.objects.get_or_create(
         username=username, defaults={"password": "unused"}
     )
     if created:
@@ -129,7 +129,7 @@ def main() -> int:
 
     def attempt(username: str) -> None:
         connection.close()
-        user = User.objects.get(username=username)
+        user = UserModel.objects.get(username=username)
         try:
             sale = create_sale_with_stock(
                 customer=None,
