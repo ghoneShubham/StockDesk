@@ -1,0 +1,27 @@
+[Unit]
+Description=StockDesk Gunicorn daemon
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=stockdesk
+Group=www-data
+RuntimeDirectory=stockdesk
+WorkingDirectory=/opt/stockdesk/app
+EnvironmentFile=/opt/stockdesk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+# Create socket as stockdesk:www-data so nginx (www-data) can connect
+UMask=0007
+ExecStart=/opt/stockdesk/venv/bin/gunicorn \
+    --config /opt/stockdesk/app/deploy/gunicorn.conf.py \
+    config.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

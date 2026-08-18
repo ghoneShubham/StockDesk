@@ -1,6 +1,15 @@
+"""
+Production settings — Day 13 deploy baseline.
+
+DEBUG is always False here. Media stays on local disk until Day 14 enables S3
+(when AWS_STORAGE_BUCKET_NAME is set). Static files are collected to STATIC_ROOT
+and served by nginx.
+"""
+
 from decouple import Csv, config
 
 from .base import *  # noqa: F401,F403
+from .base import STORAGES as BASE_STORAGES
 
 # --- Non-negotiable: DEBUG is False in production from the first deploy. ---
 DEBUG = False
@@ -8,7 +17,7 @@ DEBUG = False
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 
-# --- Security hardening ---
+# --- Security hardening (behind nginx TLS) ---
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -19,9 +28,15 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# --- Login rate limiting handled by apps.core.throttling (see accounts app) ---
+# Hashed static filenames for cache-busting; nginx serves STATIC_ROOT.
+STORAGES = {
+    **BASE_STORAGES,
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
+}
 
-# --- S3 storage for media (product images, invoice PDFs) ---
+# --- S3 media (Day 14). Empty bucket name → keep local FileSystemStorage (Day 13). ---
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME", default="")
@@ -31,17 +46,13 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 3600
 
-STORAGES = {
-    "default": {
+if AWS_STORAGE_BUCKET_NAME:
+    STORAGES["default"] = {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {"location": "media"},
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
-    },
-}
+    }
 
-# --- Email via SES (SMTP interface); outbox pattern drains via cron/systemd timer ---
+# --- Email via SES (wired Day 14; safe no-op host until credentials exist) ---
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="email-smtp.ap-south-1.amazonaws.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
@@ -49,7 +60,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 
-# --- Sentry (optional, only active if DSN provided) ---
+# Prefer WeasyPrint on Ubuntu when system libs are installed; xhtml2pdf still works.
+INVOICE_PDF_ENGINE = config("INVOICE_PDF_ENGINE", default="xhtml2pdf")
+
 SENTRY_DSN = config("SENTRY_DSN", default="")
 if SENTRY_DSN:
     import sentry_sdk
