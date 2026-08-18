@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# StockDesk Day 13 — Ubuntu 24.04 EC2 bootstrap (ap-south-1, t3.micro)
+# StockDesk Day 13 — Ubuntu 22.04/24.04 EC2 bootstrap (ap-south-1, t3.micro)
 # Run as root AFTER the repo is at /opt/stockdesk/app and .env exists.
 #
 #   sudo bash deploy/setup_ec2.sh your.subdomain.example.com
@@ -20,14 +20,21 @@ PIP="$VENV/bin/pip"
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo "==> OS info"
+. /etc/os-release
+echo "Running on ${PRETTY_NAME:-unknown}"
+
 echo "==> Packages"
 apt-get update -y
+# Use distro python3 (3.10 on 22.04, 3.12 on 24.04) — do not hardcode 3.12
 apt-get install -y \
-  python3.12 python3.12-venv python3-pip \
+  python3 python3-venv python3-pip python3-dev \
   postgresql postgresql-contrib libpq-dev \
   nginx certbot python3-certbot-nginx \
   git curl build-essential libjpeg-dev zlib1g-dev \
   pkg-config
+
+python3 --version
 
 echo "==> 2 GB swap (t3.micro)"
 if [[ ! -f /swapfile ]]; then
@@ -74,7 +81,9 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${DB_NAME}')\gexec
 SQL
 
 echo "==> Python venv + deps"
-python3.12 -m venv "$VENV"
+# Recreate venv if a previous failed run left a broken one
+rm -rf "$VENV"
+python3 -m venv "$VENV"
 "$PIP" install --upgrade pip
 "$PIP" install -r "$APP_ROOT/requirements/prod.txt"
 chown -R "$APP_USER":www-data /opt/stockdesk
