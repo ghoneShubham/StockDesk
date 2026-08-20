@@ -1,0 +1,13 @@
+[Unit]
+Description=StockDesk weekly dead-stock report enqueue
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=stockdesk
+Group=www-data
+WorkingDirectory=/opt/stockdesk/app
+EnvironmentFile=/opt/stockdesk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/opt/stockdesk/venv/bin/python manage.py alert_dead_stock
+Nice=10

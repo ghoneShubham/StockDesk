@@ -151,7 +151,11 @@ RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET", default="")
 RAZORPAY_WEBHOOK_SECRET = config("RAZORPAY_WEBHOOK_SECRET", default="")
 
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@stockdesk.local")
+# Used for low-stock, dead-stock, and reconcile-drift outbox alerts.
 LOW_STOCK_ALERT_RECIPIENTS = config("LOW_STOCK_ALERT_RECIPIENTS", default="", cast=Csv())
+
+BACKUP_RETENTION_DAYS = config("BACKUP_RETENTION_DAYS", default=7, cast=int)
+BACKUP_S3_PREFIX = config("BACKUP_S3_PREFIX", default="backups")
 
 # ---------------------------------------------------------------------------
 # Logging — structured, per-request-id, file based with rotation.
