@@ -34,6 +34,7 @@ class SaleListView(PermissionRequiredMixin, ListView):
             related_model=SaleItem,
             fk_field="sale_id",
         ).order_by("-sale_date", "-id")
+
         q = self.request.GET.get("q", "").strip()
         if q:
             filters = (
@@ -41,8 +42,30 @@ class SaleListView(PermissionRequiredMixin, ListView):
                 | Q(customer__name__icontains=q)
                 | Q(customer__phone__icontains=q)
             )
+            # Allow typing payment status words, e.g. "pending", "paid", "partial"
+            q_lower = q.casefold()
+            status_hits = [
+                code
+                for code, label in Sale.PaymentStatus.choices
+                if q_lower in code.casefold() or q_lower in label.casefold()
+            ]
+            if status_hits:
+                filters |= Q(payment_status__in=status_hits)
             qs = qs.filter(filters)
+
+        payment_status = self.request.GET.get("payment_status", "").strip()
+        valid_statuses = {c for c, _ in Sale.PaymentStatus.choices}
+        if payment_status in valid_statuses:
+            qs = qs.filter(payment_status=payment_status)
+
         return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["payment_status_filter"] = self.request.GET.get("payment_status", "")
+        ctx["payment_status_choices"] = Sale.PaymentStatus.choices
+        return ctx
 
 
 class SaleDetailView(PermissionRequiredMixin, DetailView):

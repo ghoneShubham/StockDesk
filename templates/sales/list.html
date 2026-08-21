@@ -15,16 +15,38 @@
     {% endif %}
 </header>
 
-<form method="get" class="sd-panel mb-3">
+<form method="get" action="{% url 'sales:sale_list' %}" class="sd-panel mb-3" id="sales-search-form">
     <div class="row g-2 align-items-end">
-        <div class="col-md-8">
-            <label class="form-label">Search</label>
-            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Invoice no, customer, or phone">
+        <div class="col-md-5">
+            <label class="form-label" for="sales-search-q">Search</label>
+            <input
+                id="sales-search-q"
+                type="search"
+                name="q"
+                value="{{ q }}"
+                class="form-control"
+                placeholder="Invoice, customer, phone, or pending / paid"
+                autocomplete="off"
+                spellcheck="false"
+            >
         </div>
         <div class="col-md-4">
-            <button type="submit" class="sd-btn-primary">Search</button>
+            <label class="form-label" for="sales-payment-status">Payment status</label>
+            <select id="sales-payment-status" name="payment_status" class="form-select">
+                <option value="">All</option>
+                {% for code, label in payment_status_choices %}
+                <option value="{{ code }}" {% if payment_status_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="sd-btn-primary flex-grow-1">Search</button>
+            {% if q or payment_status_filter %}
+            <a href="{% url 'sales:sale_list' %}" class="btn btn-outline-secondary">Clear</a>
+            {% endif %}
         </div>
     </div>
+    <p class="small text-muted mb-0 mt-2">Tip: type <strong>pending</strong> in search, or pick Pending in Payment status.</p>
 </form>
 
 <div class="sd-panel p-0 overflow-hidden">
@@ -53,7 +75,7 @@
                     <td>{{ sale.created_by|default:"—" }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-muted p-4">No sales yet. <a href="{% url 'sales:sale_create' %}" class="btn btn-sm btn-outline-primary ms-1">New sale</a></td></tr>
+                <tr><td colspan="7" class="text-muted p-4">No sales match this search.{% if perms.sales.add_sale %} <a href="{% url 'sales:sale_create' %}" class="btn btn-sm btn-outline-primary ms-1">New sale</a>{% endif %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -64,11 +86,11 @@
 <nav class="mt-3">
     <ul class="pagination">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">Prev</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&amp;q={{ q|urlencode }}&amp;payment_status={{ payment_status_filter|urlencode }}">Prev</a></li>
         {% endif %}
         <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&amp;q={{ q|urlencode }}&amp;payment_status={{ payment_status_filter|urlencode }}">Next</a></li>
         {% endif %}
     </ul>
 </nav>
