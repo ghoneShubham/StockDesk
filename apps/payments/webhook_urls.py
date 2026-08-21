@@ -1,3 +1,7 @@
 from django.urls import path
 
-urlpatterns = []
+from .views import RazorpayWebhookView
+
+urlpatterns = [
+    path("", RazorpayWebhookView.as_view(), name="razorpay_webhook"),
+]

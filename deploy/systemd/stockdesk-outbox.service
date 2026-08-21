@@ -1,0 +1,13 @@
+[Unit]
+Description=StockDesk drain email outbox
+After=network.target postgresql.service stockdesk.service
+
+[Service]
+Type=oneshot
+User=stockdesk
+Group=www-data
+WorkingDirectory=/opt/stockdesk/app
+EnvironmentFile=/opt/stockdesk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/opt/stockdesk/venv/bin/python manage.py drain_email_outbox --limit 50
+Nice=10

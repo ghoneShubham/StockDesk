@@ -1,0 +1,10 @@
+[Unit]
+Description=StockDesk dead-stock report timer (Mondays 07:30)
+
+[Timer]
+OnCalendar=Mon *-*-* 07:30:00
+Persistent=true
+Unit=stockdesk-dead-stock.service
+
+[Install]
+WantedBy=timers.target

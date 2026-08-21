@@ -1,0 +1,13 @@
+[Unit]
+Description=StockDesk daily low-stock alert enqueue
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=stockdesk
+Group=www-data
+WorkingDirectory=/opt/stockdesk/app
+EnvironmentFile=/opt/stockdesk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/opt/stockdesk/venv/bin/python manage.py alert_low_stock
+Nice=10

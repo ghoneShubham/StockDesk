@@ -1,0 +1,10 @@
+[Unit]
+Description=StockDesk nightly backup timer (03:15)
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+Unit=stockdesk-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -53,6 +53,7 @@ STORE_MANAGER_PERMS = [
     ("inventory", "add_adjustment"), ("inventory", "view_adjustment"),
     ("inventory", "view_stockmovement"),
     ("reports", "view_operational_reports"),
+    ("payments", "add_paymentlink"), ("payments", "view_paymentlink"),
 ]
 
 CASHIER_PERMS = [
@@ -63,6 +64,7 @@ CASHIER_PERMS = [
     ("masters", "view_customer"),
     ("sales", "add_sale"), ("sales", "view_sale"),
     ("sales", "add_saleitem"), ("sales", "view_saleitem"),
+    ("payments", "add_paymentlink"), ("payments", "view_paymentlink"),
 ]
 
 ROLE_PERMS = {

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AuditLog
+from .models import AuditLog, EmailOutbox
 
 
 @admin.register(AuditLog)
@@ -18,4 +18,32 @@ class AuditLogAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(EmailOutbox)
+class EmailOutboxAdmin(admin.ModelAdmin):
+    list_display = ("id", "status", "subject", "attempts", "created_at", "sent_at")
+    list_filter = ("status",)
+    search_fields = ("subject", "idempotency_key", "to_addresses")
+    readonly_fields = (
+        "to_addresses",
+        "subject",
+        "body_text",
+        "body_html",
+        "status",
+        "attempts",
+        "max_attempts",
+        "last_error",
+        "idempotency_key",
+        "next_attempt_at",
+        "sent_at",
+        "created_at",
+        "updated_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False

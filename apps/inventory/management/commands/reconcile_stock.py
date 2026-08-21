@@ -31,6 +31,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Exit with code 1 if any drift/orphan/negative stock is found.",
         )
+        parser.add_argument(
+            "--email-on-drift",
+            action="store_true",
+            help="Day 14: enqueue an outbox alert to LOW_STOCK_ALERT_RECIPIENTS when drift is found.",
+        )
 
     def handle(self, *args, **options):
         issues: list[str] = []
@@ -49,8 +54,35 @@ class Command(BaseCommand):
         for line in issues:
             self.stdout.write(f"  - {line}")
 
+        if options.get("email_on_drift"):
+            self._enqueue_drift_email(issues)
+
         if options["fail_on_drift"]:
             raise SystemExit(1)
+
+    def _enqueue_drift_email(self, issues: list[str]) -> None:
+        from django.conf import settings
+        from django.utils import timezone
+
+        from apps.core.outbox import enqueue_email
+
+        recipients = list(getattr(settings, "LOW_STOCK_ALERT_RECIPIENTS", []) or [])
+        if not recipients:
+            self.stdout.write(self.style.WARNING("LOW_STOCK_ALERT_RECIPIENTS empty — skip email."))
+            return
+
+        today = timezone.localdate().isoformat()
+        body = "StockDesk reconciliation drift detected:\n\n" + "\n".join(f"- {i}" for i in issues[:100])
+        if len(issues) > 100:
+            body += f"\n... and {len(issues) - 100} more"
+        row = enqueue_email(
+            to=recipients,
+            subject=f"[StockDesk] Stock reconcile drift ({len(issues)}) — {today}",
+            body_text=body,
+            idempotency_key=f"reconcile-drift-{today}",
+        )
+        if row:
+            self.stdout.write(self.style.SUCCESS(f"Enqueued EmailOutbox#{row.pk}"))
 
     def _movement_sum(self, reference_type: str, reference_id: int) -> Decimal:
         total = (

@@ -329,6 +329,41 @@ def test_manager_can_view_sales_list(client, user_factory, catalog):
 
 
 @pytest.mark.django_db
+def test_sales_list_filters_pending_by_search_and_dropdown(client, user_factory, catalog):
+    owner = user_factory("owner_pending_filter", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("10"))
+    pending = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        payment_status=Sale.PaymentStatus.PENDING,
+        user=owner,
+    )
+    paid = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        payment_status=Sale.PaymentStatus.PAID,
+        user=owner,
+    )
+    assert client.login(username="owner_pending_filter", password="pass1234!")
+
+    by_text = client.get(reverse("sales:sale_list"), {"q": "pending"})
+    assert by_text.status_code == 200
+    assert by_text.context["q"] == "pending"
+    body = by_text.content.decode()
+    assert pending.invoice_no in body
+    assert paid.invoice_no not in body
+
+    by_dropdown = client.get(reverse("sales:sale_list"), {"payment_status": "pending"})
+    assert by_dropdown.status_code == 200
+    assert by_dropdown.context["payment_status_filter"] == "pending"
+    body2 = by_dropdown.content.decode()
+    assert pending.invoice_no in body2
+    assert paid.invoice_no not in body2
+
+
+@pytest.mark.django_db
 def test_next_invoice_no_is_sequential(db):
     from django.db import transaction
 

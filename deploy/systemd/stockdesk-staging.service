@@ -1,0 +1,31 @@
+[Unit]
+Description=StockDesk staging Gunicorn daemon
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=stockdesk
+Group=www-data
+RuntimeDirectory=stockdesk-staging
+WorkingDirectory=/opt/stockdesk/app
+EnvironmentFile=/opt/stockdesk/app/.env.staging
+Environment=DJANGO_SETTINGS_MODULE=config.settings.staging
+UMask=0007
+ExecStart=/opt/stockdesk/venv/bin/gunicorn \
+    --bind unix:/run/stockdesk-staging/gunicorn.sock \
+    --workers 2 \
+    --timeout 60 \
+    --access-logfile - \
+    --error-logfile - \
+    config.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

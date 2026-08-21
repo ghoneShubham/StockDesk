@@ -20,6 +20,14 @@
         <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
             <i class="bi bi-printer"></i> Print
         </button>
+        {% if can_send_payment_link and sale.payment_status != "paid" %}
+        <form method="post" action="{% url 'payments:send_payment_link' sale.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-link-45deg"></i> Send payment link
+            </button>
+        </form>
+        {% endif %}
     </div>
 </header>
 
@@ -86,6 +94,21 @@
                 <dt class="col-5">PDF file</dt>
                 <dd class="col-7">{% if sale.pdf %}Stored{% else %}Not generated yet{% endif %}</dd>
             </dl>
+        </section>
+        <section class="sd-panel">
+            <h2 class="h5">Payment links</h2>
+            <ul class="list-unstyled mb-0 small">
+                {% for link in payment_links %}
+                <li class="mb-2">
+                    <span class="badge text-bg-secondary">{{ link.get_status_display }}</span>
+                    ₹{{ link.amount|inr }}
+                    <a href="{{ link.short_url }}" target="_blank" rel="noopener">Open link</a>
+                    <div class="text-muted">{{ link.created_at|date:"d M Y H:i" }}</div>
+                </li>
+                {% empty %}
+                <li class="text-muted">No payment links yet.</li>
+                {% endfor %}
+            </ul>
         </section>
         <section class="sd-panel">
             <h2 class="h5">Stock movements</h2>

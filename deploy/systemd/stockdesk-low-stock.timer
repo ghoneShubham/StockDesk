@@ -1,0 +1,10 @@
+[Unit]
+Description=StockDesk low-stock alert timer (daily 07:00 Asia/Kolkata wall clock ≈ IST)
+
+[Timer]
+OnCalendar=*-*-* 07:00:00
+Persistent=true
+Unit=stockdesk-low-stock.service
+
+[Install]
+WantedBy=timers.target

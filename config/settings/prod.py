@@ -1,9 +1,9 @@
 """
-Production settings — Day 13 deploy baseline.
+Production settings — Day 13+14.
 
-DEBUG is always False here. Media stays on local disk until Day 14 enables S3
-(when AWS_STORAGE_BUCKET_NAME is set). Static files are collected to STATIC_ROOT
-and served by nginx.
+DEBUG is always False. Set AWS_STORAGE_BUCKET_NAME to serve media from S3
+(product images + invoice PDFs). Static files are collected to STATIC_ROOT
+and served by nginx. Email uses SES SMTP; ops alerts go through EmailOutbox.
 """
 
 from decouple import Csv, config
@@ -55,13 +55,17 @@ if AWS_STORAGE_BUCKET_NAME:
         "OPTIONS": {"location": "media"},
     }
 
-# --- Email via SES (wired Day 14; safe no-op host until credentials exist) ---
+# --- Email via SES SMTP ---
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="email-smtp.ap-south-1.amazonaws.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+
+# Nightly pg_dump → S3 (backup_database management command)
+BACKUP_RETENTION_DAYS = config("BACKUP_RETENTION_DAYS", default=7, cast=int)
+BACKUP_S3_PREFIX = config("BACKUP_S3_PREFIX", default="backups")
 
 # Prefer WeasyPrint on Ubuntu when system libs are installed; xhtml2pdf still works.
 INVOICE_PDF_ENGINE = config("INVOICE_PDF_ENGINE", default="xhtml2pdf")

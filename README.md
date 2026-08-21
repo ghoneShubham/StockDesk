@@ -123,12 +123,12 @@ stockdesk/
 │   ├── inventory/     # StockMovement, Adjustment, reconciliation command
 │   ├── purchases/     # Purchase, PurchaseItem
 │   ├── sales/         # Sale, SaleItem, invoice + PDF
-│   ├── payments/      # PaymentLink, PaymentEvent, Razorpay webhook
+│   ├── payments/      # PaymentLink, PaymentEvent, Razorpay webhook + reconcile
 │   └── reports/       # all reports (ORM + raw SQL), CSV export
 ├── templates/
 ├── static/
 ├── requirements/      # base.txt, dev.txt, prod.txt
-└── docs/              # PERFORMANCE.md, RUNBOOK.md, SQL.md, SECURITY.md
+└── docs/              # PERFORMANCE, RUNBOOK, SQL, SECURITY, COST
 ```
 
 ## Documentation
@@ -137,6 +137,7 @@ stockdesk/
 - [`docs/PERFORMANCE.md`](./docs/PERFORMANCE.md) — query counts, timings, indexes
 - [`docs/SQL.md`](./docs/SQL.md) — every report, ORM vs raw SQL
 - [`docs/SECURITY.md`](./docs/SECURITY.md) — self-audit results
+- [`docs/COST.md`](./docs/COST.md) — spend notes + how to cut cost
 - [`commands.md`](./commands.md) — every Linux/Postgres/git command looked up
 
 ## Contributing / workflow

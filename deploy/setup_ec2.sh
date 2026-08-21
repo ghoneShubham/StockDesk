@@ -127,5 +127,7 @@ echo "==> Health check"
 sleep 2
 curl -fsS "https://${DOMAIN}/health/" || curl -fsS "http://127.0.0.1/health/" -H "Host: ${DOMAIN}" || true
 
-echo "Day 13 bootstrap finished. See docs/RUNBOOK.md"
-echo "Day 14 (not now): S3, SES, backups, staging."
+echo "Day 13/14 bootstrap finished. See docs/RUNBOOK.md"
+echo "Next (Day 14): configure S3+SES in .env, then:"
+echo "  sudo bash deploy/install_timers.sh"
+echo "  sudo bash deploy/setup_staging.sh   # after .env.staging exists"
