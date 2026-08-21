@@ -262,9 +262,24 @@ sudo systemctl restart stockdesk
 | Backup command errors | empty `AWS_STORAGE_BUCKET_NAME` or IAM missing `s3:PutObject` |
 | Emails never arrive | SES sandbox + unverified recipient; or outbox timer not installed |
 | Staging 502 | `stockdesk-staging` down or SG missing 8080 |
+| Payment link fails | Missing `RAZORPAY_KEY_ID/SECRET` (test keys) or live key rejected |
+| Webhook 403 | Wrong `RAZORPAY_WEBHOOK_SECRET` or not using raw body signature |
 
 ---
 
-## 12. Stopping the instance (cost)
+## 12. Day 15 — Razorpay (Module F)
+
+1. Razorpay Dashboard → **Test mode** → API Keys → put `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` in `.env` (never `rzp_live_…`).
+2. Webhooks → add URL `https://YOUR_DOMAIN/webhooks/razorpay/` → secret → `RAZORPAY_WEBHOOK_SECRET`.
+3. Subscribe at least to `payment_link.paid` (and optionally `payment.captured`).
+4. Restart app. On an unpaid invoice → **Send payment link** → pay with Razorpay test cards → sale should become **Paid** via webhook (not the browser redirect).
+5. Owner → Financial reports → **Payment reconciliation** for gateway vs books mismatches.
+6. Re-run roles after deploy: `python manage.py bootstrap_roles`
+
+---
+
+## 13. Stopping the instance (cost)
 
 Stopping EC2 saves money but **releases the public IP** unless you use an Elastic IP. After start, update DNS if needed, then `systemctl status stockdesk nginx`.
+
+Cost notes: [`docs/COST.md`](COST.md). Security audit: [`docs/SECURITY.md`](SECURITY.md).

@@ -11,6 +11,7 @@ from apps.core.mixins import PermissionRequiredMixin
 from apps.core.query import annotate_line_count
 from apps.inventory.models import StockMovement
 from apps.masters.models import Product
+from apps.payments.models import PaymentLink
 
 from .forms import SaleForm, SaleItemFormSet, lines_from_formset
 from .models import Sale, SaleItem
@@ -67,6 +68,10 @@ class SaleDetailView(PermissionRequiredMixin, DetailView):
             .select_related("product")
             .order_by("id")
         )
+        ctx["payment_links"] = (
+            PaymentLink.objects.filter(sale=self.object).order_by("-created_at")[:10]
+        )
+        ctx["can_send_payment_link"] = self.request.user.has_perm("payments.add_paymentlink")
         return ctx
 
 

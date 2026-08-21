@@ -47,6 +47,11 @@ class FinancialReportsView(PermissionRequiredMixin, TemplateView):
         ctx["financial_reports"] = [
             {"name": "Stock valuation", "url_name": "reports:stock_valuation", "desc": "qty × purchase price"},
             {"name": "Profit margin", "url_name": "reports:profit_margin", "desc": "Per product, divide-by-zero safe"},
+            {
+                "name": "Payment reconciliation",
+                "url_name": "payments:reconcile",
+                "desc": "Gateway (Razorpay) vs invoice payment status",
+            },
         ]
         return ctx
 

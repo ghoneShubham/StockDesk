@@ -73,3 +73,11 @@ project (Section 14 deliverable).
 | `sudo bash deploy/install_timers.sh` | Enable systemd timers for the jobs above |
 | `sudo bash deploy/setup_staging.sh` | Staging DB + gunicorn + nginx on port 8080 |
 | `pytest apps/core/tests_outbox.py apps/core/tests_prod_settings.py -q` | Day 14 outbox + settings guards |
+
+## Day 15 — Module F + security
+
+| Command | Why |
+|---|---|
+| `python manage.py bootstrap_roles` | Grant cashier/manager payment-link perms after Day 15 |
+| `pytest apps/payments/tests.py -q` | Webhook signature, idempotency, reconcile, send-link |
+| `curl -X POST https://YOUR_DOMAIN/webhooks/razorpay/` | Razorpay webhook endpoint (needs valid signature) |

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Payment reconciliation · StockDesk{% endblock %}
+{% block content %}
+{% url 'reports:financial' as back_url %}
+{% url 'core:dashboard' as dashboard_url %}
+{% include "includes/back_nav.html" with back_url=back_url back_label="Financial reports" home_url=dashboard_url home_label="Dashboard" %}
+<header class="mb-3">
+    <h1 class="sd-page-title">Payment reconciliation</h1>
+    <p class="sd-page-sub mb-0">Disagreements between Razorpay (gateway) and invoice payment status (books). Webhook is source of truth for paid.</p>
+</header>
+
+<section class="sd-panel p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table sd-table mb-0">
+            <thead>
+                <tr>
+                    <th>Kind</th>
+                    <th>Invoice</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in issues %}
+                <tr>
+                    <td><code>{{ row.kind }}</code></td>
+                    <td>
+                        {% if row.sale_id %}
+                        <a href="{% url 'sales:sale_detail' row.sale_id %}">{{ row.invoice_no }}</a>
+                        {% else %}
+                        {{ row.invoice_no }}
+                        {% endif %}
+                    </td>
+                    <td>{{ row.detail }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-muted p-3">No disagreements found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
