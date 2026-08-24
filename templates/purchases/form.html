@@ -29,6 +29,7 @@
             <div class="col-md-4">
                 <label class="form-label" for="{{ form.supplier_invoice_no.id_for_label }}">Supplier invoice no.</label>
                 {{ form.supplier_invoice_no }}
+                {% if form.supplier_invoice_no.help_text %}<div class="form-text">{{ form.supplier_invoice_no.help_text }}</div>{% endif %}
                 {% for e in form.supplier_invoice_no.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
             </div>
         </div>

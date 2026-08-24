@@ -155,3 +155,63 @@ def test_purchase_list_shows_created_rows(client, user_factory, catalog):
     response = client.get(reverse("purchases:purchase_list"))
     assert response.status_code == 200
     assert b"Acme Supplies" in response.content
+
+
+@pytest.mark.django_db
+def test_next_supplier_invoice_no_is_sequential(db):
+    from django.db import transaction
+
+    from apps.purchases.models import PurchaseSequence
+    from apps.purchases.services import financial_year_for, next_supplier_invoice_no
+
+    when = timezone.localdate()
+    fy = financial_year_for(when)
+    with transaction.atomic():
+        a = next_supplier_invoice_no(when=when)
+        b = next_supplier_invoice_no(when=when)
+    assert a != b
+    assert a.endswith("000001")
+    assert b.endswith("000002")
+    assert a.startswith(f"PINV-{fy}-")
+    assert PurchaseSequence.objects.get(financial_year=fy).last_number == 2
+
+
+@pytest.mark.django_db
+def test_create_purchase_auto_generates_supplier_invoice_no(user_factory, catalog):
+    owner = user_factory("owner_auto_inv", OWNER)
+    purchase = create_purchase_with_stock(
+        supplier=catalog["supplier"],
+        purchase_date=timezone.localdate(),
+        supplier_invoice_no="",
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("10.00")}],
+        user=owner,
+    )
+    assert purchase.supplier_invoice_no.startswith("PINV-")
+    assert purchase.supplier_invoice_no.endswith("000001")
+
+
+@pytest.mark.django_db
+def test_purchase_form_auto_generates_blank_supplier_invoice(client, user_factory, catalog):
+    user_factory("manager_auto_inv", STORE_MANAGER)
+    assert client.login(username="manager_auto_inv", password="pass1234!")
+    response = client.get(reverse("purchases:purchase_create"))
+    assert response.status_code == 200
+    assert b"Leave blank to auto-generate" in response.content
+    assert b"PINV-" in response.content
+
+    payload = {
+        "supplier": catalog["supplier"].pk,
+        "supplier_invoice_no": "",
+        "purchase_date": timezone.localdate().isoformat(),
+        "items-TOTAL_FORMS": "1",
+        "items-INITIAL_FORMS": "0",
+        "items-MIN_NUM_FORMS": "0",
+        "items-MAX_NUM_FORMS": "1000",
+        "items-0-product": catalog["p1"].pk,
+        "items-0-qty": "2",
+        "items-0-rate": "10.00",
+    }
+    response = client.post(reverse("purchases:purchase_create"), payload)
+    assert response.status_code == 302, response.content.decode()[:500]
+    purchase = Purchase.objects.latest("id")
+    assert purchase.supplier_invoice_no.startswith("PINV-")

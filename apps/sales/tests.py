@@ -286,7 +286,11 @@ def test_cashier_can_create_sale_via_form(client, user_factory, catalog):
     stock_in(owner, catalog, catalog["p1"], Decimal("5"))
     user_factory("cashier_sale", CASHIER)
     assert client.login(username="cashier_sale", password="pass1234!")
-    assert client.get(reverse("sales:sale_create")).status_code == 200
+    get_resp = client.get(reverse("sales:sale_create"))
+    assert get_resp.status_code == 200
+    get_body = get_resp.content.decode()
+    assert "Assigned automatically" in get_body
+    assert "INV-" in get_body
 
     when = timezone.localtime().strftime("%Y-%m-%dT%H:%M")
     payload = {

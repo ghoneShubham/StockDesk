@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.masters.models import Product, Supplier
 
 from .models import Purchase, PurchaseItem
+from .services import peek_next_supplier_invoice_no
 
 
 class PurchaseForm(forms.ModelForm):
@@ -14,7 +15,7 @@ class PurchaseForm(forms.ModelForm):
         widgets = {
             "supplier": forms.Select(attrs={"class": "form-select"}),
             "supplier_invoice_no": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Supplier invoice / bill no."}
+                attrs={"class": "form-control", "autocomplete": "off"}
             ),
             "purchase_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
         }
@@ -23,6 +24,10 @@ class PurchaseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["supplier"].queryset = Supplier.objects.filter(is_active=True).order_by("name")
         self.fields["purchase_date"].initial = timezone.localdate()
+        preview = peek_next_supplier_invoice_no()
+        self.fields["supplier_invoice_no"].required = False
+        self.fields["supplier_invoice_no"].help_text = f"Leave blank to auto-generate. Next: {preview}."
+        self.fields["supplier_invoice_no"].widget.attrs["placeholder"] = preview
 
 
 class PurchaseItemForm(forms.ModelForm):

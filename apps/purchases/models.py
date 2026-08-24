@@ -6,6 +6,20 @@ from django.db import models
 from apps.masters.models import Product, Supplier
 
 
+class PurchaseSequence(models.Model):
+    """
+    One locked counter row per financial year. `apps.purchases.services.next_supplier_invoice_no`
+    locks this row with `select_for_update()` so concurrent purchases cannot get the same
+    auto-generated supplier invoice number.
+    """
+
+    financial_year = models.CharField(max_length=9, unique=True)  # e.g. "2025-26"
+    last_number = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.financial_year}: last={self.last_number}"
+
+
 class Purchase(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="purchases")
     supplier_invoice_no = models.CharField(max_length=64, blank=True)

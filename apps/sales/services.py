@@ -69,6 +69,15 @@ def next_invoice_no(*, when: datetime | None = None) -> str:
     return f"INV-{fy}-{seq.last_number:06d}"
 
 
+def peek_next_invoice_no(*, when: datetime | None = None) -> str:
+    """Preview of the next sales invoice number without allocating it."""
+    when = when or timezone.now()
+    fy = financial_year_for(timezone.localtime(when) if timezone.is_aware(when) else when)
+    seq = InvoiceSequence.objects.filter(financial_year=fy).first()
+    n = (seq.last_number if seq else 0) + 1
+    return f"INV-{fy}-{n:06d}"
+
+
 @transaction.atomic
 def create_sale_with_stock(
     *,

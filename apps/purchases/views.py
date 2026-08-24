@@ -98,7 +98,7 @@ class PurchaseCreateView(PermissionRequiredMixin, View):
 
             messages.success(
                 request,
-                f"Purchase #{purchase.pk} saved - stock increased for {len(lines)} line(s).",
+                f"Purchase #{purchase.pk} ({purchase.supplier_invoice_no}) saved - stock increased for {len(lines)} line(s).",
             )
             return redirect(reverse("purchases:purchase_detail", kwargs={"pk": purchase.pk}))
 

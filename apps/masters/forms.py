@@ -114,7 +114,7 @@ class ProductForm(forms.ModelForm):
             "is_active",
         )
         widgets = {
-            "sku": forms.TextInput(attrs={"class": "form-control"}),
+            "sku": forms.TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-select"}),
             "unit": forms.Select(attrs={"class": "form-select"}),
@@ -146,16 +146,37 @@ class ProductForm(forms.ModelForm):
             self.fields["sale_price"].disabled = True
             self.fields["sale_price"].help_text = "Only the Owner can change selling price."
 
+        if not self.instance.pk:
+            from .services import peek_next_sku
+
+            preview = peek_next_sku()
+            self.fields["sku"].required = False
+            self.fields["sku"].help_text = f"Leave blank to auto-generate. Next: {preview}."
+            self.fields["sku"].widget.attrs["placeholder"] = preview
+
     def clean_sku(self):
-        sku = self.cleaned_data["sku"].strip().upper()
+        sku = (self.cleaned_data.get("sku") or "").strip().upper()
         if not sku:
-            raise ValidationError("SKU is required.")
+            if self.instance.pk:
+                raise ValidationError("SKU is required.")
+            return ""
         qs = Product.objects.filter(sku__iexact=sku)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
             raise ValidationError("A product with this SKU already exists.")
         return sku
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if not instance.sku:
+            from .services import next_sku
+
+            instance.sku = next_sku()
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
     def clean_name(self):
         name = self.cleaned_data["name"].strip()

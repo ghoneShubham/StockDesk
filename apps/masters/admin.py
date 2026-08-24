@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Customer, Product, Supplier
+from .models import Category, Customer, Product, SkuSequence, Supplier
 
 
 @admin.register(Category)
@@ -29,6 +29,32 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ("category",)
     readonly_fields = ("created_at", "updated_at")
     list_per_page = 50
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:
+            form.base_fields["sku"].required = False
+            form.base_fields["sku"].help_text = "Leave blank to auto-generate."
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not (obj.sku or "").strip():
+            from .services import next_sku
+
+            obj.sku = next_sku()
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(SkuSequence)
+class SkuSequenceAdmin(admin.ModelAdmin):
+    list_display = ("slug", "last_number")
+    readonly_fields = ("slug", "last_number")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Supplier)

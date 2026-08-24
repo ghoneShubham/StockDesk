@@ -21,6 +21,20 @@ class Category(TimeStampedModel):
         return self.name
 
 
+class SkuSequence(models.Model):
+    """
+    Single locked counter for auto-generated product SKUs.
+    `apps.masters.services.next_sku` uses `select_for_update()` so concurrent
+    product creates cannot issue the same SKU.
+    """
+
+    slug = models.CharField(max_length=16, unique=True, default="default")
+    last_number = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"SKU sequence: last={self.last_number}"
+
+
 class Product(TimeStampedModel):
     class Unit(models.TextChoices):
         PIECE = "pc", "Piece"

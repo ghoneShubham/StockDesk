@@ -16,7 +16,7 @@ from apps.payments.models import PaymentLink
 from .forms import SaleForm, SaleItemFormSet, lines_from_formset
 from .models import Sale, SaleItem
 from .pdf import ensure_invoice_pdf
-from .services import InsufficientStockError, SaleValidationError, create_sale_with_stock
+from .services import InsufficientStockError, SaleValidationError, create_sale_with_stock, peek_next_invoice_no
 
 logger = logging.getLogger("stockdesk.sales")
 
@@ -190,5 +190,10 @@ class SaleCreateView(PermissionRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"form": form, "formset": formset, "product_prices": price_map},
+            {
+                "form": form,
+                "formset": formset,
+                "product_prices": price_map,
+                "preview_invoice_no": peek_next_invoice_no(),
+            },
         )

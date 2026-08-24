@@ -17,6 +17,11 @@
         <h2 class="h5 mb-3">Header</h2>
         <div class="row g-3">
             <div class="col-md-4">
+                <label class="form-label">Invoice no.</label>
+                <input class="form-control" value="{{ preview_invoice_no }}" readonly>
+                <div class="form-text">Assigned automatically when you save.</div>
+            </div>
+            <div class="col-md-4">
                 <label class="form-label" for="{{ form.customer.id_for_label }}">Customer</label>
                 {{ form.customer }}
                 {% for e in form.customer.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}

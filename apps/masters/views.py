@@ -137,8 +137,9 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, f"Product “{form.instance.name}” created.")
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, f"Product “{self.object.sku} — {self.object.name}” created.")
+        return response
 
 
 class ProductUpdateView(PermissionRequiredMixin, UpdateView):

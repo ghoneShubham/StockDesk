@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, PurchaseItem
+from .models import Purchase, PurchaseItem, PurchaseSequence
 
 
 class PurchaseItemInline(admin.TabularInline):
@@ -18,3 +18,15 @@ class PurchaseAdmin(admin.ModelAdmin):
     date_hierarchy = "purchase_date"
     readonly_fields = ("created_by", "created_at")
     inlines = [PurchaseItemInline]
+
+
+@admin.register(PurchaseSequence)
+class PurchaseSequenceAdmin(admin.ModelAdmin):
+    list_display = ("financial_year", "last_number")
+    readonly_fields = ("financial_year", "last_number")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

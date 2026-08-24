@@ -231,3 +231,46 @@ def test_product_deactivate_is_soft_delete(client, user_factory, product):
     assert product.is_active is False
     assert product.sellable is False
     assert Product.objects.filter(pk=product.pk).exists()
+
+
+@pytest.mark.django_db
+def test_next_sku_is_sequential(db):
+    from apps.masters.services import next_sku
+    from apps.masters.models import SkuSequence
+
+    a = next_sku()
+    b = next_sku()
+    assert a == "SKU-000001"
+    assert b == "SKU-000002"
+    assert SkuSequence.objects.get(slug="default").last_number == 2
+
+
+@pytest.mark.django_db
+def test_product_create_auto_generates_sku(client, user_factory, category):
+    user_factory("manager_sku", STORE_MANAGER)
+    assert client.login(username="manager_sku", password="pass1234!")
+
+    get_resp = client.get(reverse("masters:product_create"))
+    assert get_resp.status_code == 200
+    body = get_resp.content.decode()
+    assert "SKU-000001" in body
+    assert "Leave blank to auto-generate" in body
+
+    create_resp = client.post(
+        reverse("masters:product_create"),
+        {
+            "sku": "",
+            "name": "Auto SKU Item",
+            "category": category.pk,
+            "unit": "pc",
+            "hsn_code": "",
+            "purchase_price": "20.00",
+            "sale_price": "30.00",
+            "reorder_level": "1",
+            "sellable": "on",
+            "is_active": "on",
+        },
+    )
+    assert create_resp.status_code == 302
+    created = Product.objects.get(name="Auto SKU Item")
+    assert created.sku == "SKU-000001"
