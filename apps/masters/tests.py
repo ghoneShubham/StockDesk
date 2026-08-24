@@ -64,6 +64,25 @@ def test_cashier_can_view_product_list_without_purchase_price(client, user_facto
     assert "55.00" in body
     assert "Purchase" not in body
     assert "40.00" not in body
+    assert ">Filter<" in body
+    assert 'name="status"' in body
+
+
+@pytest.mark.django_db
+def test_product_list_status_filter(client, user_factory, product):
+    user_factory("cashier_status", CASHIER)
+    product.is_active = False
+    product.save(update_fields=["is_active"])
+    assert client.login(username="cashier_status", password="pass1234!")
+
+    active = client.get(reverse("masters:product_list"), {"status": "active"})
+    assert active.status_code == 200
+    assert product.name not in active.content.decode()
+    assert ">Filter<" in active.content.decode()
+
+    inactive = client.get(reverse("masters:product_list"), {"status": "inactive"})
+    assert inactive.status_code == 200
+    assert product.name in inactive.content.decode()
 
 
 @pytest.mark.django_db

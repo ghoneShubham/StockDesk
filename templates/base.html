@@ -91,6 +91,16 @@
     e.preventDefault();
     go(row.dataset.href);
   });
+  document.addEventListener("change", function (e) {
+    const el = e.target;
+    if (!el || el.tagName !== "SELECT") return;
+    const form = el.form;
+    if (!form) return;
+    const method = (form.getAttribute("method") || "get").toLowerCase();
+    if (method !== "get") return;
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.submit();
+  });
 })();
 </script>
 {% block extra_js %}{% endblock %}

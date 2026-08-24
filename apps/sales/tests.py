@@ -365,6 +365,7 @@ def test_sales_list_filters_pending_by_search_and_dropdown(client, user_factory,
     body2 = by_dropdown.content.decode()
     assert pending.invoice_no in body2
     assert paid.invoice_no not in body2
+    assert ">Search<" in body2
 
 
 @pytest.mark.django_db
