@@ -144,6 +144,120 @@
     return (neg ? "-" : "") + grouped + "." + frac;
   }
 
+  /**
+   * Native <select> list stays as-is. Typing accumulates ALL characters
+   * (e.g. "bott" -> Bottle). Uses document capture so the browser's
+   * single-letter jump does not steal keys while the list is open.
+   */
+  function enableTypeToSelect(select) {
+    if (!select || select.dataset.typeSelectBound === "1") return;
+    select.dataset.typeSelectBound = "1";
+
+    let buffer = "";
+    let clearTimer = null;
+    let hint = select.parentElement.querySelector(".sd-type-hint");
+    if (!hint) {
+      hint = document.createElement("div");
+      hint.className = "form-text sd-type-hint";
+      hint.hidden = true;
+      select.insertAdjacentElement("afterend", hint);
+    }
+
+    function resetOptions() {
+      Array.from(select.options).forEach(function (opt) {
+        opt.hidden = false;
+      });
+    }
+
+    function applyBuffer() {
+      const q = buffer.trim().toLowerCase();
+      const options = Array.from(select.options);
+      let firstMatch = null;
+
+      options.forEach(function (opt) {
+        if (!opt.value) {
+          opt.hidden = false;
+          return;
+        }
+        const text = opt.text.toLowerCase();
+        const ok = !q || text.includes(q);
+        opt.hidden = !ok;
+        if (ok && !firstMatch) firstMatch = opt;
+      });
+
+      if (q && firstMatch) {
+        if (select.value !== firstMatch.value) {
+          select.value = firstMatch.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        hint.textContent = 'Filter: "' + buffer + '"';
+        hint.hidden = false;
+      } else if (q) {
+        hint.textContent = 'No match for "' + buffer + '"';
+        hint.hidden = false;
+      } else {
+        resetOptions();
+        hint.hidden = true;
+        hint.textContent = "";
+      }
+    }
+
+    function clearBufferSoon() {
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(function () {
+        buffer = "";
+        resetOptions();
+        hint.hidden = true;
+        hint.textContent = "";
+      }, 2500);
+    }
+
+    function onDocKey(e) {
+      if (document.activeElement !== select) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      // Keep arrow/enter/tab/escape navigation working normally.
+      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === "Tab") {
+        return;
+      }
+      if (e.key === "Escape") {
+        buffer = "";
+        applyBuffer();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        buffer = buffer.slice(0, -1);
+        applyBuffer();
+        clearBufferSoon();
+        return;
+      }
+      if (e.key.length !== 1) return;
+
+      // Block browser single-character select jump; keep full typed string.
+      e.preventDefault();
+      e.stopPropagation();
+      buffer += e.key.toLowerCase();
+      applyBuffer();
+      clearBufferSoon();
+    }
+
+    select.addEventListener("focus", function () {
+      document.addEventListener("keydown", onDocKey, true);
+    });
+    select.addEventListener("blur", function () {
+      document.removeEventListener("keydown", onDocKey, true);
+      buffer = "";
+      resetOptions();
+      hint.hidden = true;
+      hint.textContent = "";
+      clearTimeout(clearTimer);
+    });
+  }
+
   function recalc() {
     let total = 0;
     document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach((row) => {
@@ -163,7 +277,7 @@
   function bindRow(row) {
     const productEl = row.querySelector(".purchase-product");
     const rateEl = row.querySelector(".purchase-rate");
-    if (typeof enableTypeToSelect === "function") enableTypeToSelect(productEl);
+    enableTypeToSelect(productEl);
 
     if (productEl) {
       productEl.addEventListener("change", () => {
@@ -200,9 +314,7 @@
     recalc();
   }
 
-  if (typeof enableTypeToSelect === "function") {
-    enableTypeToSelect(document.getElementById("id_supplier"));
-  }
+  enableTypeToSelect(document.getElementById("id_supplier"));
   document.querySelectorAll("#purchase-lines tbody tr.purchase-line").forEach(bindRow);
   if (addBtn) addBtn.addEventListener("click", addRow);
   recalc();

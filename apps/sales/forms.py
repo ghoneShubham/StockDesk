@@ -63,9 +63,7 @@ class SaleItemForm(forms.ModelForm):
         model = SaleItem
         fields = ("product", "qty", "rate", "discount")
         widgets = {
-            "product": forms.Select(
-                attrs={"class": "form-select sale-product", "data-type-select": "1"}
-            ),
+            "product": forms.Select(attrs={"class": "form-select sale-product"}),
             "qty": forms.NumberInput(
                 attrs={"class": "form-control sale-qty", "step": "0.01", "min": "0.01"}
             ),
@@ -82,7 +80,6 @@ class SaleItemForm(forms.ModelForm):
         if products_qs is None:
             products_qs = Product.objects.filter(is_active=True, sellable=True).order_by("name")
         self.fields["product"].queryset = products_qs
-        self.fields["product"].label_from_instance = lambda obj: f"{obj.sku} — {obj.name}"
         self.fields["product"].required = False
         self.fields["qty"].required = False
         self.fields["rate"].required = False
