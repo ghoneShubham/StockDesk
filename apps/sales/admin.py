@@ -11,7 +11,7 @@ class SaleItemInline(admin.TabularInline):
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display = ("invoice_no", "customer", "sale_date", "total_amount", "payment_status", "created_by")
+    list_display = ("invoice_no", "customer", "sale_date", "total_amount", "amount_paid", "payment_status", "created_by")
     list_filter = ("payment_status", "sale_date")
     search_fields = ("invoice_no", "customer__name", "customer__phone")
     autocomplete_fields = ("customer",)

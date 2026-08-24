@@ -312,7 +312,48 @@ def test_cashier_can_create_sale_via_form(client, user_factory, catalog):
     assert response.status_code == 302, response.content.decode()[:800]
     sale = Sale.objects.latest("id")
     assert sale.total_amount == Decimal("30.00")
+    assert sale.amount_paid == Decimal("30.00")
     assert stock_of(catalog["p1"]) == Decimal("3")
+
+
+@pytest.mark.django_db
+def test_partial_sale_requires_and_stores_amount_paid(client, user_factory, catalog):
+    owner = user_factory("owner_partial_amt", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("5"))
+    assert client.login(username="owner_partial_amt", password="pass1234!")
+    when = timezone.localtime().strftime("%Y-%m-%dT%H:%M")
+    base = {
+        "customer": catalog["customer"].pk,
+        "sale_date": when,
+        "discount": "0",
+        "tax": "0",
+        "payment_status": Sale.PaymentStatus.PARTIAL,
+        "items-TOTAL_FORMS": "1",
+        "items-INITIAL_FORMS": "0",
+        "items-MIN_NUM_FORMS": "0",
+        "items-MAX_NUM_FORMS": "1000",
+        "items-0-product": catalog["p1"].pk,
+        "items-0-qty": "2",
+        "items-0-rate": "15.00",
+        "items-0-discount": "0",
+    }
+    missing = client.post(reverse("sales:sale_create"), {**base, "amount_paid": "0"})
+    assert missing.status_code == 200
+    assert b"how much was paid" in missing.content.lower() or b"amount paid" in missing.content.lower()
+
+    ok = client.post(reverse("sales:sale_create"), {**base, "amount_paid": "10.00"})
+    assert ok.status_code == 302, ok.content.decode()[:800]
+    sale = Sale.objects.latest("id")
+    assert sale.payment_status == Sale.PaymentStatus.PARTIAL
+    assert sale.total_amount == Decimal("30.00")
+    assert sale.amount_paid == Decimal("10.00")
+    assert sale.balance_due == Decimal("20.00")
+
+    detail = client.get(reverse("sales:sale_detail", kwargs={"pk": sale.pk}))
+    assert detail.status_code == 200
+    body = detail.content.decode()
+    assert "Amount paid" in body
+    assert "Balance due" in body
 
 
 @pytest.mark.django_db

@@ -12,7 +12,7 @@ from .models import Sale, SaleItem
 class SaleForm(forms.ModelForm):
     class Meta:
         model = Sale
-        fields = ("customer", "sale_date", "discount", "tax", "payment_status")
+        fields = ("customer", "sale_date", "discount", "tax", "payment_status", "amount_paid")
         widgets = {
             "customer": forms.Select(attrs={"class": "form-select"}),
             "sale_date": forms.DateTimeInput(
@@ -25,7 +25,16 @@ class SaleForm(forms.ModelForm):
             "tax": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0", "id": "id_tax"}
             ),
-            "payment_status": forms.Select(attrs={"class": "form-select"}),
+            "payment_status": forms.Select(attrs={"class": "form-select", "id": "id_payment_status"}),
+            "amount_paid": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "id": "id_amount_paid",
+                    "placeholder": "Amount received",
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -37,9 +46,13 @@ class SaleForm(forms.ModelForm):
         self.fields["sale_date"].initial = timezone.localtime().strftime("%Y-%m-%dT%H:%M")
         self.fields["discount"].initial = Decimal("0.00")
         self.fields["tax"].initial = Decimal("0.00")
+        self.fields["amount_paid"].initial = Decimal("0.00")
+        self.fields["amount_paid"].required = False
         self.fields["payment_status"].initial = Sale.PaymentStatus.PAID
         self.fields["discount"].label = "Invoice discount"
         self.fields["tax"].label = "Tax"
+        self.fields["amount_paid"].label = "Amount paid"
+        self.fields["amount_paid"].help_text = "Required when payment is Partial."
 
     def clean_discount(self):
         value = self.cleaned_data.get("discount")
@@ -56,6 +69,28 @@ class SaleForm(forms.ModelForm):
         if value < 0:
             raise forms.ValidationError("Tax cannot be negative.")
         return value
+
+    def clean_amount_paid(self):
+        value = self.cleaned_data.get("amount_paid")
+        if value is None:
+            return Decimal("0.00")
+        if value < 0:
+            raise forms.ValidationError("Amount paid cannot be negative.")
+        return value
+
+    def clean(self):
+        cleaned = super().clean()
+        status = cleaned.get("payment_status")
+        paid = cleaned.get("amount_paid")
+        if paid is None:
+            paid = Decimal("0.00")
+            cleaned["amount_paid"] = paid
+
+        if status == Sale.PaymentStatus.PARTIAL and paid <= 0:
+            self.add_error("amount_paid", "Enter how much was paid for a partial payment.")
+        if status == Sale.PaymentStatus.PENDING:
+            cleaned["amount_paid"] = Decimal("0.00")
+        return cleaned
 
 
 class SaleItemForm(forms.ModelForm):

@@ -78,7 +78,12 @@
                 {% endif %}
             </td>
             <td><strong>Payment</strong></td>
-            <td>{{ sale.get_payment_status_display }}</td>
+            <td>
+                {{ sale.get_payment_status_display }}
+                {% if sale.payment_status == "partial" %}
+                <br><span class="muted">Paid Rs {{ sale.amount_paid|inr }} · Due Rs {{ sale.balance_due|inr }}</span>
+                {% endif %}
+            </td>
         </tr>
     </table>
 
@@ -124,6 +129,16 @@
             <td>Total</td>
             <td class="num">Rs {{ sale.total_amount|inr }}</td>
         </tr>
+        {% if sale.payment_status == "partial" or sale.amount_paid %}
+        <tr>
+            <td>Amount paid</td>
+            <td class="num">Rs {{ sale.amount_paid|inr }}</td>
+        </tr>
+        <tr>
+            <td>Balance due</td>
+            <td class="num">Rs {{ sale.balance_due|inr }}</td>
+        </tr>
+        {% endif %}
     </table>
 
     <div class="footer">

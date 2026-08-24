@@ -260,11 +260,14 @@ def _apply_paid_side_effects(
 
     if sale and sale.payment_status != Sale.PaymentStatus.PAID:
         # Webhook is source of truth for paid marking (PRD §9).
-        if amount and sale.total_amount and amount < sale.total_amount:
+        paid_so_far = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
+        if paid_so_far and sale.total_amount and paid_so_far < sale.total_amount:
             sale.payment_status = Sale.PaymentStatus.PARTIAL
+            sale.amount_paid = paid_so_far
         else:
             sale.payment_status = Sale.PaymentStatus.PAID
-        sale.save(update_fields=["payment_status"])
+            sale.amount_paid = sale.total_amount
+        sale.save(update_fields=["payment_status", "amount_paid"])
 
 
 def payment_reconciliation_rows() -> list[dict]:

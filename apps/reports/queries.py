@@ -285,7 +285,13 @@ def dashboard_metrics() -> dict:
     )
     pending_total = Sale.objects.filter(
         payment_status__in=[Sale.PaymentStatus.PENDING, Sale.PaymentStatus.PARTIAL]
-    ).aggregate(total=Coalesce(Sum("total_amount"), Value(ZERO), output_field=MONEY))["total"]
+    ).aggregate(
+        total=Coalesce(
+            Sum(ExpressionWrapper(F("total_amount") - F("amount_paid"), output_field=MONEY)),
+            Value(ZERO),
+            output_field=MONEY,
+        )
+    )["total"]
 
     top5 = top_products(month_start, today, by="revenue", limit=5)
 

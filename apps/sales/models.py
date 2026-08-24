@@ -43,6 +43,7 @@ class Sale(models.Model):
     discount = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal("0"))
     tax = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal("0"))
     total_amount = models.DecimalField(max_digits=14, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal("0"))
     payment_status = models.CharField(max_length=10, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="sales"
@@ -64,7 +65,16 @@ class Sale(models.Model):
             models.CheckConstraint(condition=models.Q(discount__gte=Decimal("0")), name="sale_discount_gte_0"),
             models.CheckConstraint(condition=models.Q(tax__gte=Decimal("0")), name="sale_tax_gte_0"),
             models.CheckConstraint(condition=models.Q(total_amount__gte=Decimal("0")), name="sale_total_gte_0"),
+            models.CheckConstraint(condition=models.Q(amount_paid__gte=Decimal("0")), name="sale_amount_paid_gte_0"),
+            models.CheckConstraint(
+                condition=models.Q(amount_paid__lte=models.F("total_amount")),
+                name="sale_amount_paid_lte_total",
+            ),
         ]
+
+    @property
+    def balance_due(self) -> Decimal:
+        return (self.total_amount - self.amount_paid).quantize(Decimal("0.01"))
 
     def __str__(self):
         return f"Invoice {self.invoice_no}"

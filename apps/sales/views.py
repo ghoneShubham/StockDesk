@@ -165,6 +165,7 @@ class SaleCreateView(PermissionRequiredMixin, View):
                     header_discount=form.cleaned_data.get("discount") or 0,
                     tax=form.cleaned_data.get("tax") or 0,
                     payment_status=form.cleaned_data.get("payment_status") or Sale.PaymentStatus.PENDING,
+                    amount_paid=form.cleaned_data.get("amount_paid") or 0,
                     user=request.user,
                 )
             except (InsufficientStockError, SaleValidationError, ValueError) as exc:

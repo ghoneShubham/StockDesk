@@ -87,6 +87,7 @@ def create_sale_with_stock(
     header_discount=Decimal("0"),
     tax=Decimal("0"),
     payment_status: str = Sale.PaymentStatus.PENDING,
+    amount_paid=Decimal("0"),
     user,
 ) -> Sale:
     """
@@ -175,6 +176,25 @@ def create_sale_with_stock(
         raise SaleValidationError("Invoice discount cannot exceed the subtotal.")
     total_amount = money(subtotal - header_discount + tax)
 
+    status = payment_status or Sale.PaymentStatus.PENDING
+    paid = money(amount_paid or 0)
+    if paid < 0:
+        raise SaleValidationError("Amount paid cannot be negative.")
+    if status == Sale.PaymentStatus.PAID:
+        paid = total_amount
+    elif status == Sale.PaymentStatus.PENDING:
+        paid = money(0)
+    elif status == Sale.PaymentStatus.PARTIAL:
+        if paid <= 0:
+            raise SaleValidationError("Enter how much was paid for a partial payment.")
+        if paid >= total_amount:
+            raise SaleValidationError(
+                "Partial payment must be less than the invoice total. Use Paid if fully settled."
+            )
+    else:
+        if paid > total_amount:
+            raise SaleValidationError("Amount paid cannot exceed the invoice total.")
+
     sale = Sale.objects.create(
         invoice_no=invoice_no,
         customer=customer,
@@ -183,7 +203,8 @@ def create_sale_with_stock(
         discount=header_discount,
         tax=tax,
         total_amount=total_amount,
-        payment_status=payment_status or Sale.PaymentStatus.PENDING,
+        amount_paid=paid,
+        payment_status=status,
         created_by=user,
     )
 
