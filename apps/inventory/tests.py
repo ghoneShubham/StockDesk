@@ -159,7 +159,12 @@ def test_manager_can_create_adjustment_via_form(client, user_factory, catalog):
     )
     user_factory("manager_adj", STORE_MANAGER)
     assert client.login(username="manager_adj", password="pass1234!")
-    assert client.get(reverse("inventory:adjustment_create")).status_code == 200
+    create_page = client.get(reverse("inventory:adjustment_create"))
+    assert create_page.status_code == 200
+    create_body = create_page.content.decode()
+    assert "type_to_select.js" in create_body
+    assert "data-type-select" in create_body
+    assert catalog["product"].name in create_body
     response = client.post(
         reverse("inventory:adjustment_create"),
         {

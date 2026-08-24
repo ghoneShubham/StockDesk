@@ -291,6 +291,9 @@ def test_cashier_can_create_sale_via_form(client, user_factory, catalog):
     get_body = get_resp.content.decode()
     assert "Assigned automatically" in get_body
     assert "INV-" in get_body
+    assert "type_to_select.js" in get_body
+    assert "data-type-select" in get_body
+    assert catalog["p1"].name in get_body
 
     when = timezone.localtime().strftime("%Y-%m-%dT%H:%M")
     payload = {

@@ -12,7 +12,9 @@ class AdjustmentForm(forms.ModelForm):
         model = Adjustment
         fields = ("product", "qty_delta", "reason", "notes")
         widgets = {
-            "product": forms.Select(attrs={"class": "form-select"}),
+            "product": forms.Select(
+                attrs={"class": "form-select", "data-type-select": "1"}
+            ),
             "qty_delta": forms.NumberInput(
                 attrs={
                     "class": "form-control",
@@ -31,6 +33,7 @@ class AdjustmentForm(forms.ModelForm):
         self.fields["product"].queryset = (
             Product.objects.filter(is_active=True).select_related("category").order_by("name")
         )
+        self.fields["product"].label_from_instance = lambda obj: f"{obj.sku} — {obj.name}"
         self.fields["qty_delta"].help_text = (
             "Positive increases stock (opening / count up). Negative decreases (damage, theft, count down)."
         )

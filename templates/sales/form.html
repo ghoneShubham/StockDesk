@@ -6,7 +6,7 @@
 {% include "includes/back_nav.html" with back_url=sales_url back_label="Sales" home_url=dashboard_url home_label="Dashboard" %}
 <header>
     <h1 class="sd-page-title">New sale</h1>
-    <p class="sd-page-sub">Keyboard-friendly billing. Saving decreases stock atomically and allocates the next invoice number.</p>
+    <p class="sd-page-sub">Keyboard-friendly billing. Click a product dropdown, then type a name or SKU to filter the list.</p>
 </header>
 
 <form method="post" novalidate id="sale-form">
@@ -194,6 +194,7 @@
   function bindRow(row) {
     const productEl = row.querySelector(".sale-product");
     const rateEl = row.querySelector(".sale-rate");
+    if (typeof enableTypeToSelect === "function") enableTypeToSelect(productEl);
     if (productEl) {
       productEl.addEventListener("change", () => {
         const price = prices[productEl.value];
