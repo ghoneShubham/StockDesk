@@ -186,6 +186,10 @@ def test_dashboard_shows_metrics(client, user_factory, catalog):
     assert response.status_code == 200
     assert response.context["today_total"] == Decimal("100.00")
     assert response.context["today_count"] == 1
+    body = response.content.decode()
+    assert reverse("sales:sale_list") in body
+    assert "payment_status=unpaid" in body
+    assert "Open pending payments" in body
 
 
 # ----- Day 12 — Set 2 + raw SQL parity -----

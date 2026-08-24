@@ -41,12 +41,21 @@
         {% endif %}
     </div>
     <div class="col-sm-6 col-xl-3">
+        {% if can_see_pending_payments %}
+        <a href="{% url 'sales:sale_list' %}?payment_status=unpaid" class="sd-metric sd-metric--ink" aria-label="Open pending payments">
+            <div class="sd-metric__icon"><i class="bi bi-wallet2"></i></div>
+            <div class="sd-metric__label">Pending Payments</div>
+            <div class="sd-metric__value">₹{{ pending_payment_total|inr }}</div>
+            <div class="sd-metric__meta">Pending + partial invoices</div>
+        </a>
+        {% else %}
         <div class="sd-metric sd-metric--ink">
             <div class="sd-metric__icon"><i class="bi bi-wallet2"></i></div>
             <div class="sd-metric__label">Pending Payments</div>
             <div class="sd-metric__value">₹{{ pending_payment_total|inr }}</div>
             <div class="sd-metric__meta">Pending + partial invoices</div>
         </div>
+        {% endif %}
     </div>
 </div>
 

@@ -20,6 +20,9 @@ from .services import InsufficientStockError, SaleValidationError, create_sale_w
 
 logger = logging.getLogger("stockdesk.sales")
 
+UNPAID_FILTER = "unpaid"
+UNPAID_STATUSES = (Sale.PaymentStatus.PENDING, Sale.PaymentStatus.PARTIAL)
+
 
 class SaleListView(PermissionRequiredMixin, ListView):
     model = Sale
@@ -55,7 +58,9 @@ class SaleListView(PermissionRequiredMixin, ListView):
 
         payment_status = self.request.GET.get("payment_status", "").strip()
         valid_statuses = {c for c, _ in Sale.PaymentStatus.choices}
-        if payment_status in valid_statuses:
+        if payment_status == UNPAID_FILTER:
+            qs = qs.filter(payment_status__in=UNPAID_STATUSES)
+        elif payment_status in valid_statuses:
             qs = qs.filter(payment_status=payment_status)
 
         return qs
@@ -65,6 +70,8 @@ class SaleListView(PermissionRequiredMixin, ListView):
         ctx["q"] = self.request.GET.get("q", "")
         ctx["payment_status_filter"] = self.request.GET.get("payment_status", "")
         ctx["payment_status_choices"] = Sale.PaymentStatus.choices
+        ctx["unpaid_filter"] = UNPAID_FILTER
+        ctx["is_pending_payments"] = ctx["payment_status_filter"] == UNPAID_FILTER
         return ctx
 
 

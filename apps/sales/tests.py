@@ -369,6 +369,42 @@ def test_sales_list_filters_pending_by_search_and_dropdown(client, user_factory,
 
 
 @pytest.mark.django_db
+def test_sales_list_unpaid_filter_shows_pending_and_partial(client, user_factory, catalog):
+    owner = user_factory("owner_unpaid_filter", OWNER)
+    stock_in(owner, catalog, catalog["p1"], Decimal("10"))
+    pending = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        payment_status=Sale.PaymentStatus.PENDING,
+        user=owner,
+    )
+    partial = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        payment_status=Sale.PaymentStatus.PARTIAL,
+        user=owner,
+    )
+    paid = create_sale_with_stock(
+        customer=catalog["customer"],
+        sale_date=timezone.now(),
+        lines=[{"product": catalog["p1"], "qty": Decimal("1"), "rate": Decimal("15.00")}],
+        payment_status=Sale.PaymentStatus.PAID,
+        user=owner,
+    )
+    assert client.login(username="owner_unpaid_filter", password="pass1234!")
+    response = client.get(reverse("sales:sale_list"), {"payment_status": "unpaid"})
+    assert response.status_code == 200
+    assert response.context["is_pending_payments"] is True
+    body = response.content.decode()
+    assert "Pending payments" in body
+    assert pending.invoice_no in body
+    assert partial.invoice_no in body
+    assert paid.invoice_no not in body
+
+
+@pytest.mark.django_db
 def test_next_invoice_no_is_sequential(db):
     from django.db import transaction
 

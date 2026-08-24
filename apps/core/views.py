@@ -33,4 +33,5 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ctx.update(metrics)
         user = self.request.user
         ctx["can_see_low_stock"] = user.has_perm("reports.view_operational_reports")
+        ctx["can_see_pending_payments"] = user.has_perm("sales.view_sale")
         return ctx

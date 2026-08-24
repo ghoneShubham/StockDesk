@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Sales · StockDesk{% endblock %}
+{% block title %}{% if is_pending_payments %}Pending payments{% else %}Sales{% endif %} · StockDesk{% endblock %}
 {% block content %}
 {% url 'core:dashboard' as dashboard_url %}
 {% include "includes/back_nav.html" with back_url=dashboard_url back_label="Dashboard" %}
 <header class="sd-page-header d-flex flex-wrap justify-content-between align-items-start gap-2">
     <div>
-        <h1 class="sd-page-title">Sales</h1>
-        <p class="sd-page-sub">Billing with concurrency-safe stock-out and sequential invoice numbers.</p>
+        <h1 class="sd-page-title">{% if is_pending_payments %}Pending payments{% else %}Sales{% endif %}</h1>
+        <p class="sd-page-sub">{% if is_pending_payments %}Invoices still waiting to be collected — pending and partial.{% else %}Billing with concurrency-safe stock-out and sequential invoice numbers.{% endif %}</p>
     </div>
     {% if perms.sales.add_sale %}
     <a href="{% url 'sales:sale_create' %}" class="sd-btn-primary text-decoration-none" style="width:auto;padding:0.65rem 1.2rem;">
@@ -34,6 +34,7 @@
             <label class="form-label" for="sales-payment-status">Payment status</label>
             <select id="sales-payment-status" name="payment_status" class="form-select">
                 <option value="">All</option>
+                <option value="{{ unpaid_filter }}" {% if payment_status_filter == unpaid_filter %}selected{% endif %}>Pending payments</option>
                 {% for code, label in payment_status_choices %}
                 <option value="{{ code }}" {% if payment_status_filter == code %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
